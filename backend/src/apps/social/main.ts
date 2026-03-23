@@ -6,7 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(SocialApiModule);
   applyCommonAppMiddleware(app, {
     title: 'Socialbook Social API',
-    description: 'Friends and notifications service',
+    description: 'Friends service',
     path: 'api/docs/social',
   }, 'social');
 

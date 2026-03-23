@@ -6,17 +6,17 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongo
+  name: socialbook-mongo-reviews
   namespace: socialbook
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mongo
+      app: socialbook-mongo-reviews
   template:
     metadata:
       labels:
-        app: mongo
+        app: socialbook-mongo-reviews
     spec:
       containers:
         - name: mongo
@@ -33,11 +33,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongo
+  name: socialbook-mongo-reviews
   namespace: socialbook
 spec:
   selector:
-    app: mongo
+    app: socialbook-mongo-reviews
   ports:
     - name: mongo
       port: 27017
@@ -46,32 +46,233 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: socialbook-mongo-users
   namespace: socialbook
-  annotations:
-    argocd.argoproj.io/sync-options: Replace=true,Force=true
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: socialbook-mongo-users
   template:
     metadata:
       labels:
-        app: backend
-      annotations:
-        app.kubernetes.io/version: "latest"
-        app.kubernetes.io/rollout-trigger: "dev-${GIT_SHA}"
+        app: socialbook-mongo-users
     spec:
       containers:
-        - name: backend
+        - name: mongo
+          image: mongo:7
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+      volumes:
+        - name: mongo-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: socialbook-mongo-users
+  namespace: socialbook
+spec:
+  selector:
+    app: socialbook-mongo-users
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: 27017
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: socialbook-mongo-social
+  namespace: socialbook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: socialbook-mongo-social
+  template:
+    metadata:
+      labels:
+        app: socialbook-mongo-social
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:7
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+      volumes:
+        - name: mongo-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: socialbook-mongo-social
+  namespace: socialbook
+spec:
+  selector:
+    app: socialbook-mongo-social
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: 27017
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: socialbook-mongo-booklists
+  namespace: socialbook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: socialbook-mongo-booklists
+  template:
+    metadata:
+      labels:
+        app: socialbook-mongo-booklists
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:7
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+      volumes:
+        - name: mongo-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: socialbook-mongo-booklists
+  namespace: socialbook
+spec:
+  selector:
+    app: socialbook-mongo-booklists
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: 27017
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: socialbook-mongo-notifications
+  namespace: socialbook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: socialbook-mongo-notifications
+  template:
+    metadata:
+      labels:
+        app: socialbook-mongo-notifications
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:7
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+      volumes:
+        - name: mongo-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: socialbook-mongo-notifications
+  namespace: socialbook
+spec:
+  selector:
+    app: socialbook-mongo-notifications
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: 27017
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: socialbook-reviews
+  namespace: socialbook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: socialbook-reviews
+  template:
+    metadata:
+      labels:
+        app: socialbook-reviews
+    spec:
+      containers:
+        - name: reviews
           image: alazar111/socialbook-backend:latest
           imagePullPolicy: Always
+          command: ["node", "dist/apps/reviews/main.js"]
           ports:
             - containerPort: 5000
           env:
             - name: MONGODB_URI
-              value: mongodb://mongo:27017/socialbook
+              value: mongodb://socialbook-mongo-reviews:27017/reviews
+            - name: KEYCLOAK_URL
+              value: https://keycloak.ltu-m7011e-11.se
+            - name: KEYCLOAK_REALM
+              value: Userenter
+            - name: RABBITMQ_URL
+              value: amqp://admin:HelloWorld123@rabbitmq-service-api.rabbitmq.svc.cluster.local:5672
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: socialbook-reviews
+  namespace: socialbook
+spec:
+  selector:
+    app: socialbook-reviews
+  ports:
+    - name: http
+      port: 5000
+      targetPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: socialbook-users
+  namespace: socialbook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: socialbook-users
+  template:
+    metadata:
+      labels:
+        app: socialbook-users
+    spec:
+      containers:
+        - name: users
+          image: alazar111/socialbook-backend:latest
+          imagePullPolicy: Always
+          command: ["node", "dist/apps/users/main.js"]
+          ports:
+            - containerPort: 5000
+          env:
+            - name: MONGODB_URI
+              value: mongodb://socialbook-mongo-users:27017/users
             - name: KEYCLOAK_URL
               value: https://keycloak.ltu-m7011e-11.se
             - name: KEYCLOAK_REALM
@@ -82,19 +283,15 @@ spec:
               value: Q5kcOEPkC2guAT5yKPJgnc7FPNmIROje
             - name: KEYCLOAK_PUBLIC_CLIENT_ID
               value: socialbook
-            - name: BACKEND_IMAGE_TAG
-              value: latest
-            - name: RABBITMQ_URL
-              value: amqp://admin:HelloWorld123@rabbitmq-service-api.rabbitmq.svc.cluster.local:5672
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend
+  name: socialbook-users
   namespace: socialbook
 spec:
   selector:
-    app: backend
+    app: socialbook-users
   ports:
     - name: http
       port: 5000
@@ -103,68 +300,148 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: socialbook-social
   namespace: socialbook
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: socialbook-social
   template:
     metadata:
       labels:
-        app: frontend
-      annotations:
-        app.kubernetes.io/version: "latest"
-        app.kubernetes.io/rollout-trigger: "2026-01-07T09:20:00Z"
+        app: socialbook-social
     spec:
       containers:
-        - name: frontend
-          image: alazar111/socialbook-frontend:frontend-90d6c3d
+        - name: social
+          image: alazar111/socialbook-backend:latest
           imagePullPolicy: Always
+          command: ["node", "dist/apps/social/main.js"]
           ports:
-            - containerPort: 80
+            - containerPort: 5000
           env:
-            - name: VITE_API_BASE
-              value: /api
-            - name: VITE_KEYCLOAK_URL
+            - name: MONGODB_URI
+              value: mongodb://socialbook-mongo-social:27017/social
+            - name: KEYCLOAK_URL
               value: https://keycloak.ltu-m7011e-11.se
-            - name: VITE_KEYCLOAK_REALM
+            - name: KEYCLOAK_REALM
               value: Userenter
-            - name: VITE_KEYCLOAK_CLIENT_ID
-              value: socialbook
-            - name: FRONTEND_IMAGE_TAG
-              value: latest
+            - name: BOOKLISTS_SERVICE_URL
+              value: http://socialbook-booklists:5000
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend
+  name: socialbook-social
   namespace: socialbook
 spec:
   selector:
-    app: frontend
+    app: socialbook-social
   ports:
     - name: http
-      port: 80
-      targetPort: 80
+      port: 5000
+      targetPort: 5000
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: notifications-worker
+  name: socialbook-notifications
   namespace: socialbook
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: notifications-worker
+      app: socialbook-notifications
   template:
     metadata:
       labels:
-        app: notifications-worker
-      annotations:
-        app.kubernetes.io/version: "latest"
-        app.kubernetes.io/rollout-trigger: "dev-${GIT_SHA}"
+        app: socialbook-notifications
+    spec:
+      containers:
+        - name: notifications
+          image: alazar111/socialbook-backend:latest
+          imagePullPolicy: Always
+          command: ["node", "dist/apps/notifications/main.js"]
+          ports:
+            - containerPort: 5000
+          env:
+            - name: MONGODB_URI
+              value: mongodb://socialbook-mongo-notifications:27017/notifications
+            - name: KEYCLOAK_URL
+              value: https://keycloak.ltu-m7011e-11.se
+            - name: KEYCLOAK_REALM
+              value: Userenter
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: socialbook-notifications
+  namespace: socialbook
+spec:
+  selector:
+    app: socialbook-notifications
+  ports:
+    - name: http
+      port: 5000
+      targetPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: socialbook-booklists
+  namespace: socialbook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: socialbook-booklists
+  template:
+    metadata:
+      labels:
+        app: socialbook-booklists
+    spec:
+      containers:
+        - name: booklists
+          image: alazar111/socialbook-backend:latest
+          imagePullPolicy: Always
+          command: ["node", "dist/apps/booklists/main.js"]
+          ports:
+            - containerPort: 5000
+          env:
+            - name: MONGODB_URI
+              value: mongodb://socialbook-mongo-booklists:27017/booklists
+            - name: KEYCLOAK_URL
+              value: https://keycloak.ltu-m7011e-11.se
+            - name: KEYCLOAK_REALM
+              value: Userenter
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: socialbook-booklists
+  namespace: socialbook
+spec:
+  selector:
+    app: socialbook-booklists
+  ports:
+    - name: http
+      port: 5000
+      targetPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: socialbook-notifications-worker
+  namespace: socialbook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: socialbook-notifications-worker
+  template:
+    metadata:
+      labels:
+        app: socialbook-notifications-worker
     spec:
       containers:
         - name: notifications-worker
@@ -179,7 +456,49 @@ spec:
               value: socialbook.notifications
             - name: RABBITMQ_ROUTING_KEY
               value: review.commented
-            - name: MONGODB_URI
-              value: mongodb://mongo:27017/socialbook
-            - name: NOTIFICATIONS_COLLECTION
-              value: notifications
+            - name: NOTIFICATIONS_API_URL
+              value: http://socialbook-notifications:5000/internal/notifications
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: socialbook-frontend
+  namespace: socialbook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: socialbook-frontend
+  template:
+    metadata:
+      labels:
+        app: socialbook-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: alazar111/socialbook-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: VITE_API_BASE
+              value: /api
+            - name: VITE_KEYCLOAK_URL
+              value: https://keycloak.ltu-m7011e-11.se
+            - name: VITE_KEYCLOAK_REALM
+              value: Userenter
+            - name: VITE_KEYCLOAK_CLIENT_ID
+              value: socialbook
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: socialbook-frontend
+  namespace: socialbook
+spec:
+  selector:
+    app: socialbook-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80

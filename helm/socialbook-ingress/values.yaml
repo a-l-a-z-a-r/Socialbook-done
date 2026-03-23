@@ -9,6 +9,7 @@ services:
   reviews: socialbook-reviews
   users: socialbook-users
   social: socialbook-social
+  notifications: socialbook-notifications
   booklists: socialbook-booklists
   frontend: socialbook-frontend
 

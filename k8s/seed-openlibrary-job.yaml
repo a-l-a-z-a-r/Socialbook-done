@@ -14,5 +14,5 @@ spec:
           imagePullPolicy: Always
           env:
             - name: MONGODB_URI
-              value: mongodb://mongo:27017/socialbook
+              value: mongodb://socialbook-mongo-reviews:27017/reviews
           command: ["node", "scripts/seed-openlibrary.js"]

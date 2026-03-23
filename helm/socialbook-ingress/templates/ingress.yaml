@@ -35,6 +35,13 @@ spec:
                 name: {{ .Values.services.social }}
                 port:
                   number: {{ .Values.ports.api }}
+          - path: /api/docs/notifications
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.services.notifications }}
+                port:
+                  number: {{ .Values.ports.api }}
           - path: /api/docs/booklists
             pathType: Prefix
             backend:
@@ -158,7 +165,14 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ .Values.services.social }}
+                name: {{ .Values.services.notifications }}
+                port:
+                  number: {{ .Values.ports.api }}
+          - path: /api/notifications/health
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.services.notifications }}
                 port:
                   number: {{ .Values.ports.api }}
           - path: /api/social/health

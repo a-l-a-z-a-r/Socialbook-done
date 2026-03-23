@@ -1,5 +1,4 @@
 import amqplib from 'amqplib';
-import { MongoClient } from 'mongodb';
 
 const RABBITMQ_URL =
   process.env.RABBITMQ_URL ||
@@ -7,24 +6,10 @@ const RABBITMQ_URL =
 const EXCHANGE = process.env.RABBITMQ_EXCHANGE || 'socialbook.events';
 const QUEUE = process.env.RABBITMQ_QUEUE || 'socialbook.notifications';
 const ROUTING_KEY = process.env.RABBITMQ_ROUTING_KEY || 'review.commented';
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://mongo:27017/socialbook';
-const NOTIFICATIONS_COLLECTION = process.env.NOTIFICATIONS_COLLECTION || 'notifications';
+const NOTIFICATIONS_API_URL =
+  process.env.NOTIFICATIONS_API_URL || 'http://socialbook-notifications:5000/internal/notifications';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-let mongoClient;
-let mongoReady = false;
-
-const getNotificationsCollection = async () => {
-  if (!mongoClient) {
-    mongoClient = new MongoClient(MONGODB_URI);
-  }
-  if (!mongoReady) {
-    await mongoClient.connect();
-    mongoReady = true;
-  }
-  return mongoClient.db().collection(NOTIFICATIONS_COLLECTION);
-};
 
 const run = async () => {
   // Simple reconnect loop for a demo worker.
@@ -51,16 +36,23 @@ const run = async () => {
               channel.ack(msg);
               return;
             }
-            const collection = await getNotificationsCollection();
-            await collection.insertOne({
-              user: targetUser,
-              actor: payload?.user,
-              message: payload?.message,
-              reviewId: payload?.reviewId,
-              commentId: payload?.commentId,
-              read: false,
-              created_at: new Date(),
+            const response = await fetch(NOTIFICATIONS_API_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+              },
+              body: JSON.stringify({
+                targetUser,
+                actor: payload?.user,
+                message: payload?.message,
+                reviewId: payload?.reviewId,
+                commentId: payload?.commentId,
+              }),
             });
+            if (!response.ok) {
+              throw new Error(`notifications API returned ${response.status}`);
+            }
             console.log('[worker] notification saved');
             channel.ack(msg);
           } catch (err) {

@@ -1,30 +1,116 @@
 services:
-  backend:
+  reviews:
     build: ./backend
-    ports:
-      - "5000:5000"
-    env_file:
-      - ./backend/.env
+    command: ["node", "dist/apps/reviews/main.js"]
+    environment:
+      MONGODB_URI: mongodb://mongo-reviews:27017/reviews
+      KEYCLOAK_URL: https://keycloak.ltu-m7011e-11.se
+      KEYCLOAK_REALM: Userenter
+      RABBITMQ_URL: amqp://admin:HelloWorld123@rabbitmq-service-api.rabbitmq.svc.cluster.local:5672
     depends_on:
-      - mongo
+      - mongo-reviews
+
+  users:
+    build: ./backend
+    command: ["node", "dist/apps/users/main.js"]
+    environment:
+      MONGODB_URI: mongodb://mongo-users:27017/users
+      KEYCLOAK_URL: https://keycloak.ltu-m7011e-11.se
+      KEYCLOAK_REALM: Userenter
+      KEYCLOAK_ADMIN_CLIENT_ID: socialbook-admin
+      KEYCLOAK_ADMIN_CLIENT_SECRET: Q5kcOEPkC2guAT5yKPJgnc7FPNmIROje
+      KEYCLOAK_PUBLIC_CLIENT_ID: socialbook
+    depends_on:
+      - mongo-users
+
+  social:
+    build: ./backend
+    command: ["node", "dist/apps/social/main.js"]
+    environment:
+      MONGODB_URI: mongodb://mongo-social:27017/social
+      KEYCLOAK_URL: https://keycloak.ltu-m7011e-11.se
+      KEYCLOAK_REALM: Userenter
+      BOOKLISTS_SERVICE_URL: http://booklists:5000
+    depends_on:
+      - mongo-social
+      - booklists
+
+  notifications:
+    build: ./backend
+    command: ["node", "dist/apps/notifications/main.js"]
+    environment:
+      MONGODB_URI: mongodb://mongo-notifications:27017/notifications
+      KEYCLOAK_URL: https://keycloak.ltu-m7011e-11.se
+      KEYCLOAK_REALM: Userenter
+    depends_on:
+      - mongo-notifications
+
+  booklists:
+    build: ./backend
+    command: ["node", "dist/apps/booklists/main.js"]
+    environment:
+      MONGODB_URI: mongodb://mongo-booklists:27017/booklists
+      KEYCLOAK_URL: https://keycloak.ltu-m7011e-11.se
+      KEYCLOAK_REALM: Userenter
+    depends_on:
+      - mongo-booklists
+
+  notifications-worker:
+    build: ./worker
+    environment:
+      RABBITMQ_URL: amqp://admin:HelloWorld123@rabbitmq-service-api.rabbitmq.svc.cluster.local:5672
+      RABBITMQ_EXCHANGE: socialbook.events
+      RABBITMQ_QUEUE: socialbook.notifications
+      RABBITMQ_ROUTING_KEY: review.commented
+      NOTIFICATIONS_API_URL: http://notifications:5000/internal/notifications
+    depends_on:
+      - notifications
 
   frontend:
-    image: alazar111/socialbook-frontend:latest
+    build: ./frontend
     ports:
       - "8080:80"
       - "8443:443"
     depends_on:
-      - backend
+      - reviews
+      - users
+      - social
+      - notifications
+      - booklists
 
-  mongo:
+  mongo-reviews:
     image: mongo:7
     restart: unless-stopped
-    ports:
-      - "27017:27017"
     volumes:
-      - mongo_data:/data/db
-    environment:
-      - MONGO_INITDB_DATABASE=socialbook
+      - mongo_reviews_data:/data/db
+
+  mongo-users:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_users_data:/data/db
+
+  mongo-social:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_social_data:/data/db
+
+  mongo-notifications:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_notifications_data:/data/db
+
+  mongo-booklists:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_booklists_data:/data/db
 
 volumes:
-  mongo_data:
+  mongo_reviews_data:
+  mongo_users_data:
+  mongo_social_data:
+  mongo_notifications_data:
+  mongo_booklists_data:

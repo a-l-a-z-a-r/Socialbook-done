@@ -9,7 +9,6 @@
     "start": "node worker.js"
   },
   "dependencies": {
-    "amqplib": "^0.10.9",
-    "mongodb": "^6.12.0"
+    "amqplib": "^0.10.9"
   }
 }

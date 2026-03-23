@@ -11,7 +11,8 @@ Argo CD Application manifests are in `k8s/argocd/socialbook-apps.yaml`.
 
 - `helm/socialbook-reviews` - reviews/feed/imports API
 - `helm/socialbook-users` - signup/login/profile/admin API
-- `helm/socialbook-social` - friends and notifications API
+- `helm/socialbook-social` - friends API
+- `helm/socialbook-notifications` - notifications API
 - `helm/socialbook-booklists` - booklists API
 - `helm/socialbook-frontend` - frontend web app
 - `helm/socialbook-mongo-reviews` - MongoDB for reviews
@@ -33,6 +34,7 @@ helm install socialbook-mongo-notifications helm/socialbook-mongo-notifications
 helm install socialbook-reviews helm/socialbook-reviews
 helm install socialbook-users helm/socialbook-users
 helm install socialbook-social helm/socialbook-social
+helm install socialbook-notifications helm/socialbook-notifications
 helm install socialbook-booklists helm/socialbook-booklists
 helm install socialbook-frontend helm/socialbook-frontend
 helm install socialbook-notifications-worker helm/socialbook-notifications-worker

@@ -53,6 +53,15 @@ export class BooklistsController {
     return { booklists: lists };
   }
 
+  @Get('internal/booklists/public/:ownerId')
+  async listPublicBooklists(@Param('ownerId') ownerId: string) {
+    if (!ownerId) {
+      throw new HttpException({ error: 'Missing owner' }, HttpStatus.BAD_REQUEST);
+    }
+    const lists = await this.booklistsService.findPublicByOwner(ownerId);
+    return { booklists: lists };
+  }
+
   @UseGuards(KeycloakAuthGuard)
   @Post('booklists')
   async createBooklist(@Body() body: CreateBooklistPayload, @Req() req: AuthRequest) {

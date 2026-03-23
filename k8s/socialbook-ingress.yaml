@@ -15,17 +15,192 @@ spec:
     - host: socialbook.ltu-m7011e-11.se
       http:
         paths:
-          - path: /api
+          - path: /api/docs/reviews
             pathType: Prefix
             backend:
               service:
-                name: backend
+                name: socialbook-reviews
+                port:
+                  number: 5000
+          - path: /api/docs/users
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-users
+                port:
+                  number: 5000
+          - path: /api/docs/social
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-social
+                port:
+                  number: 5000
+          - path: /api/docs/notifications
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-notifications
+                port:
+                  number: 5000
+          - path: /api/docs/booklists
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-booklists
+                port:
+                  number: 5000
+          - path: /api/feed
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-reviews
+                port:
+                  number: 5000
+          - path: /api/shelf
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-reviews
+                port:
+                  number: 5000
+          - path: /api/recommendations
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-reviews
+                port:
+                  number: 5000
+          - path: /api/reviews
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-reviews
+                port:
+                  number: 5000
+          - path: /api/books
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-reviews
+                port:
+                  number: 5000
+          - path: /api/comments
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-reviews
+                port:
+                  number: 5000
+          - path: /api/imports
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-reviews
+                port:
+                  number: 5000
+          - path: /api/health
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-reviews
+                port:
+                  number: 5000
+          - path: /api/reviews/health
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-reviews
+                port:
+                  number: 5000
+          - path: /api/signup
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-users
+                port:
+                  number: 5000
+          - path: /api/login
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-users
+                port:
+                  number: 5000
+          - path: /api/profile
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-users
+                port:
+                  number: 5000
+          - path: /api/users
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-users
+                port:
+                  number: 5000
+          - path: /api/users/health
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-users
+                port:
+                  number: 5000
+          - path: /api/admin
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-users
+                port:
+                  number: 5000
+          - path: /api/friends
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-social
+                port:
+                  number: 5000
+          - path: /api/social/health
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-social
+                port:
+                  number: 5000
+          - path: /api/notifications
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-notifications
+                port:
+                  number: 5000
+          - path: /api/notifications/health
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-notifications
+                port:
+                  number: 5000
+          - path: /api/booklists
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-booklists
+                port:
+                  number: 5000
+          - path: /api/booklists/health
+            pathType: Prefix
+            backend:
+              service:
+                name: socialbook-booklists
                 port:
                   number: 5000
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: socialbook-frontend
                 port:
                   number: 80

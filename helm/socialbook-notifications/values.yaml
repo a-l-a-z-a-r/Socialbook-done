@@ -7,14 +7,13 @@ image:
 
 command:
   - node
-  - dist/apps/social/main.js
+  - dist/apps/notifications/main.js
 
 service:
   type: ClusterIP
   port: 5000
 
 env:
-  MONGODB_URI: mongodb://socialbook-mongo-social:27017/social
+  MONGODB_URI: mongodb://socialbook-mongo-notifications:27017/notifications
   KEYCLOAK_URL: https://keycloak.ltu-m7011e-11.se
   KEYCLOAK_REALM: Userenter
-  BOOKLISTS_SERVICE_URL: http://socialbook-booklists:5000

@@ -12,6 +12,7 @@ node "Kubernetes Namespace: socialbook" {
   component "Reviews API" as Reviews
   component "Users API" as Users
   component "Social API" as Social
+  component "Notifications API" as Notifications
   component "Booklists API" as Booklists
   component "Notifications Worker" as Worker
 
@@ -29,26 +30,32 @@ User --> Ingress : HTTPS
 Ingress --> Frontend : / (web)
 Ingress --> Reviews : /api/feed, /api/reviews, /api/books, /api/imports
 Ingress --> Users : /api/signup, /api/login, /api/profile, /api/users, /api/admin
-Ingress --> Social : /api/friends, /api/notifications
+Ingress --> Social : /api/friends
+Ingress --> Notifications : /api/notifications
 Ingress --> Booklists : /api/booklists
 
 Frontend --> Reviews : /api/* (via ingress)
 Frontend --> Users : /api/* (via ingress)
 Frontend --> Social : /api/* (via ingress)
+Frontend --> Notifications : /api/* (via ingress)
 Frontend --> Booklists : /api/* (via ingress)
 
 Reviews --> MongoReviews : read/write
 Users --> MongoUsers : read/write
 Social --> MongoSocial : read/write
+Notifications --> MongoNotifications : read/write
 Booklists --> MongoBooklists : read/write
-Worker --> MongoNotifications : read/write
 
 Reviews --> RabbitMQ : publish events
 Worker --> RabbitMQ : consume events
+Worker --> Notifications : internal HTTP write
+
+Social --> Booklists : internal HTTP read
 
 Users --> Keycloak : admin + auth
 Reviews --> Keycloak : JWT verify
 Social --> Keycloak : JWT verify
+Notifications --> Keycloak : JWT verify
 Booklists --> Keycloak : JWT verify
 
 @enduml
