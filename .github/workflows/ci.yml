@@ -22,20 +22,20 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: Socialbook/backend/package-lock.json
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
-        working-directory: Socialbook/backend
+        working-directory: backend
         run: npm ci
 
       - name: Run tests with coverage
-        working-directory: Socialbook/backend
+        working-directory: backend
         run: npm test
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          files: Socialbook/backend/coverage/lcov.info
+          files: backend/coverage/lcov.info
           flags: backend
 
   lint-prettier:
@@ -51,16 +51,16 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: Socialbook/backend/package-lock.json
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
-        working-directory: Socialbook/backend
+        working-directory: backend
         run: npm ci
 
       - name: Run lint
-        working-directory: Socialbook/backend
+        working-directory: backend
         run: npm run lint
 
       - name: Run prettier check
-        working-directory: Socialbook/backend
+        working-directory: backend
         run: npm run format:check
