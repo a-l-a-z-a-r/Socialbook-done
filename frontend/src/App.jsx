@@ -10,6 +10,7 @@ const apiUrl = (path) => {
 };
 
 const DASHBOARD_PATH = '/dashboard';
+const BOOKLISTS_PATH = '/booklists';
 const keyFor = (item) =>
   item.id || item._id || `${item.user ?? 'anon'}-${item.book ?? 'untitled'}-${item.created_at ?? ''}`;
 const AUTH_DISABLED = false;
@@ -153,6 +154,7 @@ const App = () => {
   const [booklistActionState, setBooklistActionState] = useState({ loading: false, error: '' });
   const [booklistDeleteState, setBooklistDeleteState] = useState({ loading: false, error: '' });
   const [showBooklistForm, setShowBooklistForm] = useState(false);
+  const [booklistPicker, setBooklistPicker] = useState({ openFor: '', selectedId: '' });
   const [booklistForm, setBooklistForm] = useState({
     name: '',
     description: '',
@@ -282,6 +284,7 @@ const App = () => {
   const bookTitle = bookMatch ? decodeURIComponent(bookMatch[1]) : '';
   const isFriendsView = path === '/friends';
   const isNotificationsView = path === '/notifications';
+  const isBooklistsView = path === BOOKLISTS_PATH;
 
   useEffect(() => {
     if (!hasKeycloakConfig()) {
@@ -368,6 +371,17 @@ const App = () => {
     setBooklistActionState({ loading: false, error: '' });
     fetchBooklistItems(activeBooklistId);
   }, [activeBooklistId]);
+
+  useEffect(() => {
+    if (!booklistPicker.openFor) return;
+    if (booklistPicker.selectedId && booklists.some((list) => list._id === booklistPicker.selectedId)) {
+      return;
+    }
+    setBooklistPicker((prev) => ({
+      ...prev,
+      selectedId: activeBooklistId || booklists[0]?._id || '',
+    }));
+  }, [booklistPicker.openFor, booklistPicker.selectedId, booklists, activeBooklistId]);
 
   useEffect(() => {
     if (!bookTitle) {
@@ -598,6 +612,24 @@ const App = () => {
   const handleBooklistChange = (event) => {
     const { name, value } = event.target;
     setBooklistForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const openBooklistPicker = (targetBook) => {
+    setBooklistPicker({
+      openFor: targetBook,
+      selectedId: activeBooklistId || booklists[0]?._id || '',
+    });
+    setBooklistActionState({ loading: false, error: '' });
+  };
+
+  const closeBooklistPicker = () => {
+    setBooklistPicker({ openFor: '', selectedId: '' });
+    setBooklistActionState({ loading: false, error: '' });
+  };
+
+  const handleBooklistTargetChange = (event) => {
+    const { value } = event.target;
+    setBooklistPicker((prev) => ({ ...prev, selectedId: value }));
   };
 
   const handleCreateBooklist = async (event) => {
@@ -932,9 +964,10 @@ const App = () => {
     }
   };
 
-  const handleAddToBooklist = async (bookTitle) => {
-    if (!activeBooklistId) {
-      setBooklistActionState({ loading: false, error: 'Select a list first.' });
+  const handleAddToBooklist = async (selectedBookTitle, booklistIdOverride) => {
+    const targetBooklistId = booklistIdOverride || activeBooklistId;
+    if (!targetBooklistId) {
+      setBooklistActionState({ loading: false, error: 'Create a list first.' });
       return;
     }
     const token = getActiveToken();
@@ -944,12 +977,14 @@ const App = () => {
     }
     setBooklistActionState({ loading: true, error: '' });
     try {
-      await authFetch(`/booklists/${activeBooklistId}/items`, token, {
+      await authFetch(`/booklists/${targetBooklistId}/items`, token, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bookId: bookTitle }),
+        body: JSON.stringify({ bookId: selectedBookTitle }),
       });
-      fetchBooklistItems(activeBooklistId);
+      if (targetBooklistId === activeBooklistId) {
+        fetchBooklistItems(activeBooklistId);
+      }
       const owner =
         profile?.username ||
         profile?.preferred_username ||
@@ -959,6 +994,7 @@ const App = () => {
         fetchBooklists(owner);
       }
       setBooklistActionState({ loading: false, error: '' });
+      closeBooklistPicker();
     } catch (err) {
       setBooklistActionState({
         loading: false,
@@ -1028,6 +1064,73 @@ const App = () => {
   const handleImageError = (badKey) => {
     setFeed((prev) =>
       prev.map((item) => (keyFor(item) === badKey ? { ...item, coverUrl: null } : item)),
+    );
+  };
+
+  const renderBooklistPicker = (selectedBookTitle) => {
+    const isOpen = booklistPicker.openFor === selectedBookTitle;
+    if (!booklists.length) {
+      return (
+        <div className="booklist-picker-card">
+          <p className="meta">Create a booklist first to save books.</p>
+          <button className="ghost small" type="button" onClick={() => navigate(BOOKLISTS_PATH)}>
+            Go to booklists
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <button
+          className={`ghost small plus-button${isOpen ? ' active' : ''}`}
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            if (isOpen) {
+              closeBooklistPicker();
+            } else {
+              openBooklistPicker(selectedBookTitle);
+            }
+          }}
+          aria-label={`Add ${selectedBookTitle} to a booklist`}
+        >
+          +
+        </button>
+        {isOpen && (
+          <div
+            className="booklist-picker-card"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <label className="field">
+              <span className="meta">Choose booklist</span>
+              <select value={booklistPicker.selectedId} onChange={handleBooklistTargetChange}>
+                {booklists.map((list) => (
+                  <option key={list._id} value={list._id}>
+                    {list.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="button-row">
+              <button
+                className="primary small"
+                type="button"
+                onClick={() => handleAddToBooklist(selectedBookTitle, booklistPicker.selectedId)}
+                disabled={booklistActionState.loading}
+              >
+                {booklistActionState.loading ? 'Adding...' : 'Add'}
+              </button>
+              <button className="ghost small" type="button" onClick={closeBooklistPicker}>
+                Cancel
+              </button>
+            </div>
+            {booklistActionState.error && (
+              <p className="empty-state">{booklistActionState.error}</p>
+            )}
+          </div>
+        )}
+      </>
     );
   };
 
@@ -1393,11 +1496,18 @@ const App = () => {
             </div>
             <nav className="sidebar-nav">
               <button
-                className={`sidebar-link${!isProfileView ? ' active' : ''}`}
+                className={`sidebar-link${path === DASHBOARD_PATH ? ' active' : ''}`}
                 type="button"
                 onClick={() => navigate(DASHBOARD_PATH)}
               >
                 Dashboard
+              </button>
+              <button
+                className={`sidebar-link${isBooklistsView ? ' active' : ''}`}
+                type="button"
+                onClick={() => navigate(BOOKLISTS_PATH)}
+              >
+                Booklists
               </button>
               <button
                 className={`sidebar-link${isProfileView ? ' active' : ''}`}
@@ -1436,45 +1546,6 @@ const App = () => {
                 Notifications
               </button>
             </div>
-            <div className="sidebar-section">
-              <div className="sidebar-section-header">
-                <span>Your Library</span>
-                <button className="ghost small" type="button" onClick={() => setShowBooklistForm(true)}>
-                  New list
-                </button>
-              </div>
-              {booklists.length === 0 ? (
-                <p className="empty-state">No booklists yet.</p>
-              ) : (
-                <ul className="library-list">
-                  {booklists.map((list) => (
-                    <li key={list._id} className="library-row">
-                      <button
-                        className={`library-link${activeBooklistId === list._id ? ' active' : ''}`}
-                        type="button"
-                        onClick={() => setActiveBooklistId(list._id)}
-                      >
-                        <span>{list.name}</span>
-                        <span className="meta">{list.totalItems ?? 0}</span>
-                      </button>
-                      {list.ownerId === (profile?.username || profileState.data?.username) && (
-                        <button
-                          className="ghost small danger"
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleDeleteBooklist(list._id);
-                          }}
-                          disabled={booklistDeleteState.loading}
-                        >
-                          Delete
-                        </button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
             <div className="sidebar-footer">
               <span className="meta">{profile?.email}</span>
               <button className="ghost" type="button" onClick={handleLogout}>
@@ -1488,8 +1559,10 @@ const App = () => {
                 <p className="label">
                   {isBookView
                     ? 'Book'
-                    : isProfileView
+                  : isProfileView
                       ? 'Profile'
+                      : isBooklistsView
+                        ? 'Booklists'
                       : isFriendsView
                         ? 'Friends'
                         : isNotificationsView
@@ -1501,6 +1574,8 @@ const App = () => {
                     ? bookTitle
                     : isProfileView
                       ? profileUsername
+                      : isBooklistsView
+                        ? 'Your booklists'
                       : isFriendsView
                         ? 'Your friends'
                         : isNotificationsView
@@ -1519,7 +1594,7 @@ const App = () => {
                     aria-label="Search books"
                   />
                 </label>
-                {!isBookView && !isFriendsView && !isNotificationsView && (
+                {!isBookView && !isFriendsView && !isNotificationsView && !isBooklistsView && (
                   <button className="ghost" type="button" onClick={handleFindBooks}>
                     Refresh feed
                   </button>
@@ -1672,6 +1747,7 @@ const App = () => {
                       <button className="ghost" type="button" onClick={handleMarkRead}>
                         Read book
                       </button>
+                      {renderBooklistPicker(bookTitle)}
                     </div>
                     <p className="book-description">
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse
@@ -1896,21 +1972,22 @@ const App = () => {
                   </>
                 )}
               </section>
-            ) : (
+            ) : isBooklistsView ? (
               <>
                 <section className="hero-card">
                   <div>
-                    <p className="label">For you</p>
-                    <h3>Your listening queue, but for books.</h3>
+                    <p className="label">Your library</p>
+                    <h3>Build separate booklists for every mood.</h3>
                     <p className="meta">
-                      Curate stacks, drop in your recent reads, and keep the feed rolling.
+                      Create lists, browse what is already inside them, and use the `+` button on any book to
+                      file it where it belongs.
                     </p>
                     <div className="actions">
                       <button className="cta" type="button" onClick={() => setShowBooklistForm(true)}>
                         Create a booklist
                       </button>
-                      <button className="ghost" type="button" onClick={() => navigate(`/profile/${profile?.username || ''}`)}>
-                        View profile
+                      <button className="ghost" type="button" onClick={() => navigate(DASHBOARD_PATH)}>
+                        Back to dashboard
                       </button>
                     </div>
                   </div>
@@ -1919,6 +1996,11 @@ const App = () => {
                       <p className="label">Booklists</p>
                       <h4>{booklists.length}</h4>
                       <p className="meta">Curated collections</p>
+                    </div>
+                    <div>
+                      <p className="label">Active list</p>
+                      <h4>{activeBooklist?.name || 'None yet'}</h4>
+                      <p className="meta">{activeBooklist?.totalItems ?? 0} saved books</p>
                     </div>
                   </div>
                 </section>
@@ -1971,6 +2053,116 @@ const App = () => {
                   </section>
                 )}
 
+                <section className="booklists-layout">
+                  <section className="panel stack">
+                    <header className="panel-header">
+                      <div>
+                        <p className="label">Collections</p>
+                        <h3>All booklists</h3>
+                      </div>
+                    </header>
+                    {booklists.length === 0 ? (
+                      <p className="empty-state">No booklists yet.</p>
+                    ) : (
+                      <ul className="library-list">
+                        {booklists.map((list) => (
+                          <li key={list._id} className="library-row">
+                            <button
+                              className={`library-link${activeBooklistId === list._id ? ' active' : ''}`}
+                              type="button"
+                              onClick={() => setActiveBooklistId(list._id)}
+                            >
+                              <span>{list.name}</span>
+                              <span className="meta">{list.totalItems ?? 0}</span>
+                            </button>
+                            {list.ownerId === (profile?.username || profileState.data?.username) && (
+                              <button
+                                className="ghost small danger"
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  handleDeleteBooklist(list._id);
+                                }}
+                                disabled={booklistDeleteState.loading}
+                              >
+                                Delete
+                              </button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {booklistDeleteState.error && (
+                      <p className="empty-state">{booklistDeleteState.error}</p>
+                    )}
+                  </section>
+
+                  <section className="panel stack">
+                    <header className="panel-header">
+                      <div>
+                        <p className="label">Selected list</p>
+                        <h3>{activeBooklist?.name || 'Select a list'}</h3>
+                      </div>
+                      <div className="panel-actions">
+                        <span className="meta">{activeBooklist?.visibility || '—'}</span>
+                      </div>
+                    </header>
+                    {activeBooklist?.description && (
+                      <p className="meta">{activeBooklist.description}</p>
+                    )}
+                    {booklistItemsState.loading ? (
+                      <p className="empty-state">Loading booklist items…</p>
+                    ) : booklistItemsState.error ? (
+                      <p className="empty-state">{booklistItemsState.error}</p>
+                    ) : !activeBooklist ? (
+                      <p className="empty-state">Select a list to view its books.</p>
+                    ) : booklistItems.length === 0 ? (
+                      <p className="empty-state">No items yet. Use the `+` button on a book to add one.</p>
+                    ) : (
+                      <ul className="queue-list">
+                        {booklistItems.map((item) => (
+                          <li key={item._id}>
+                            <div>
+                              <p className="title">{item.bookId}</p>
+                              <p className="meta">{item.notes || 'No notes yet'}</p>
+                            </div>
+                            <span className="meta">{formatAddedAt(item.addedAt)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {booklistActionState.error && (
+                      <p className="empty-state">{booklistActionState.error}</p>
+                    )}
+                  </section>
+                </section>
+              </>
+            ) : (
+              <>
+                <section className="hero-card">
+                  <div>
+                    <p className="label">For you</p>
+                    <h3>Your listening queue, but for books.</h3>
+                    <p className="meta">
+                      Curate stacks, drop in your recent reads, and keep the feed rolling.
+                    </p>
+                    <div className="actions">
+                      <button className="cta" type="button" onClick={() => navigate(BOOKLISTS_PATH)}>
+                        Open booklists
+                      </button>
+                      <button className="ghost" type="button" onClick={() => navigate(`/profile/${profile?.username || ''}`)}>
+                        View profile
+                      </button>
+                    </div>
+                  </div>
+                  <div className="hero-metrics">
+                    <div>
+                      <p className="label">Booklists</p>
+                      <h4>{booklists.length}</h4>
+                      <p className="meta">Curated collections</p>
+                    </div>
+                  </div>
+                </section>
 
                 {normalizedQuery && (
                   <section className="panel stack">
@@ -2067,53 +2259,6 @@ const App = () => {
                 <section className="panel stack">
                   <header className="panel-header">
                     <div>
-                      <p className="label">Your stacks</p>
-                      <h3>{activeBooklist?.name || 'Select a list'}</h3>
-                    </div>
-                    <div className="panel-actions">
-                      <span className="meta">{activeBooklist?.visibility || '—'}</span>
-                      {activeBooklist && (
-                        <button
-                          className="ghost small danger"
-                          type="button"
-                          onClick={() => handleDeleteBooklist(activeBooklist._id)}
-                          disabled={booklistDeleteState.loading}
-                        >
-                          Delete list
-                        </button>
-                      )}
-                    </div>
-                  </header>
-                  {booklistItemsState.loading ? (
-                    <p className="empty-state">Loading booklist items…</p>
-                  ) : booklistItemsState.error ? (
-                    <p className="empty-state">{booklistItemsState.error}</p>
-                  ) : booklistItems.length === 0 ? (
-                    <p className="empty-state">No items yet. Add a book from the feed.</p>
-                  ) : (
-                    <ul className="queue-list">
-                      {booklistItems.map((item) => (
-                        <li key={item._id}>
-                          <div>
-                            <p className="title">{item.bookId}</p>
-                            <p className="meta">{item.notes || 'No notes yet'}</p>
-                          </div>
-                          <span className="meta">{formatAddedAt(item.addedAt)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {booklistActionState.error && (
-                    <p className="empty-state">{booklistActionState.error}</p>
-                  )}
-                  {booklistDeleteState.error && (
-                    <p className="empty-state">{booklistDeleteState.error}</p>
-                  )}
-                </section>
-
-                <section className="panel stack">
-                  <header className="panel-header">
-                    <div>
                       <p className="label">{feedLabel}</p>
                       <h3>{feedHeadline}</h3>
                     </div>
@@ -2192,17 +2337,7 @@ const App = () => {
                                   </div>
                                 )}
                                 <div className="button-row">
-                                  <button
-                                    className="ghost small"
-                                    type="button"
-                                    onClick={(event) => {
-                                      event.stopPropagation();
-                                      handleAddToBooklist(item.book);
-                                    }}
-                                    disabled={booklistActionState.loading}
-                                  >
-                                    Add to {activeBooklist?.name || 'list'}
-                                  </button>
+                                  {renderBooklistPicker(item.book)}
                                 </div>
                               </div>
                             </div>
