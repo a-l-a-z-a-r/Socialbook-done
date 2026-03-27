@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { KeycloakAuthGuard } from '../../auth/keycloak.guard';
 import { NotificationsService } from '../../notifications/notifications.service';
+import { validateAgainstSchema } from '../../schema/schema-validator';
 
 type AuthRequest = {
   user?: Record<string, unknown>;
@@ -21,7 +22,9 @@ type CreateNotificationDto = {
   actor?: string;
   message?: string;
   reviewId?: string;
+  booklistId?: string;
   commentId?: string;
+  type?: string;
 };
 
 @Controller()
@@ -63,8 +66,9 @@ export class NotificationsController {
 
   @Post('internal/notifications')
   async createNotification(@Body() body: CreateNotificationDto) {
-    if (!body?.targetUser) {
-      throw new HttpException({ error: 'Missing target user' }, HttpStatus.BAD_REQUEST);
+    const validation = validateAgainstSchema('api/create-notification-request.schema.json', body);
+    if (!validation.valid) {
+      throw new HttpException({ error: validation.error }, HttpStatus.BAD_REQUEST);
     }
 
     const notification = await this.notificationsService.create({
@@ -72,7 +76,9 @@ export class NotificationsController {
       actor: body.actor,
       message: body.message,
       reviewId: body.reviewId,
+      booklistId: body.booklistId,
       commentId: body.commentId,
+      type: body.type,
     });
 
     return { ok: true, notification };

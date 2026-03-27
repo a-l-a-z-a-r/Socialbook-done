@@ -13,9 +13,20 @@ const makeQuery = <T,>(result: T) => {
 };
 
 describe('BooklistsService', () => {
+  const createService = (booklistModel: any, itemModel: any = {}, overrides: Record<string, any> = {}) => {
+    const friendsService = overrides.friendsService || { listFollowers: jest.fn().mockResolvedValue([]) };
+    const queueService = overrides.queueService || { publishBooklistUpdated: jest.fn() };
+    return {
+      service: new BooklistsService(booklistModel as any, itemModel as any, friendsService as any, queueService as any),
+      friendsService,
+      queueService,
+    };
+  };
+
   it('creates booklists with defaults', async () => {
-    const model = { create: jest.fn().mockResolvedValue({ id: '1' }) };
-    const service = new BooklistsService(model as any, {} as any);
+    const created = { id: '1', _id: '1', ownerId: 'owner', name: 'Favorites', visibility: 'public' };
+    const model = { create: jest.fn().mockResolvedValue(created) };
+    const { service } = createService(model);
 
     await service.create('owner', { name: 'Favorites' });
 
@@ -26,7 +37,7 @@ describe('BooklistsService', () => {
 
   it('returns empty lists for missing owner', async () => {
     const model = { find: jest.fn() };
-    const service = new BooklistsService(model as any, {} as any);
+    const { service } = createService(model);
 
     await expect(service.findPublicByOwner('')).resolves.toEqual([]);
     expect(model.find).not.toHaveBeenCalled();
@@ -34,7 +45,7 @@ describe('BooklistsService', () => {
 
   it('searches public lists with sanitized query', async () => {
     const model = { find: jest.fn(() => makeQuery([{ id: '1' }])) };
-    const service = new BooklistsService(model as any, {} as any);
+    const { service } = createService(model);
 
     await expect(service.searchPublicLists('   ')).resolves.toEqual([]);
     await expect(service.searchPublicLists('romance?')).resolves.toEqual([{ id: '1' }]);
@@ -42,8 +53,11 @@ describe('BooklistsService', () => {
 
   it('adds items and increments totals', async () => {
     const itemModel = { create: jest.fn().mockResolvedValue({ id: 'item' }) };
-    const booklistModel = { updateOne: jest.fn() };
-    const service = new BooklistsService(booklistModel as any, itemModel as any);
+    const booklistModel = {
+      findById: jest.fn().mockResolvedValue({ _id: 'list', ownerId: 'owner', name: 'Favorites', visibility: 'public' }),
+      updateOne: jest.fn(),
+    };
+    const { service } = createService(booklistModel, itemModel);
 
     await service.addItem('list', 'owner', { bookId: 'book-1' });
 
@@ -60,9 +74,29 @@ describe('BooklistsService', () => {
       deleteOne: jest.fn().mockResolvedValue({}),
     };
     const itemModel = { deleteMany: jest.fn().mockResolvedValue({}) };
-    const service = new BooklistsService(booklistModel as any, itemModel as any);
+    const { service } = createService(booklistModel, itemModel);
 
     await expect(service.deleteList('list', 'owner')).resolves.toBe(true);
     await expect(service.deleteList('list', 'other')).resolves.toBe(false);
+  });
+
+  it('publishes notifications when a public booklist is created', async () => {
+    const created = { _id: 'list-1', ownerId: 'owner', name: 'Favorites', visibility: 'public' };
+    const booklistModel = { create: jest.fn().mockResolvedValue(created) };
+    const friendsService = { listFollowers: jest.fn().mockResolvedValue(['mila', 'alex']) };
+    const queueService = { publishBooklistUpdated: jest.fn().mockResolvedValue(undefined) };
+    const { service } = createService(booklistModel, {}, { friendsService, queueService });
+
+    await service.create('owner', { name: 'Favorites', visibility: 'public' });
+
+    expect(queueService.publishBooklistUpdated).toHaveBeenCalledTimes(2);
+    expect(queueService.publishBooklistUpdated).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ownerId: 'owner',
+        targetUser: 'mila',
+        booklistId: 'list-1',
+        action: 'created',
+      }),
+    );
   });
 });

@@ -1,5 +1,6 @@
 import amqplib from 'amqplib';
 import nodemailer from 'nodemailer';
+import { validateAgainstSchema } from '../worker/schema-validator.js';
 
 const RABBITMQ_URL =
   process.env.RABBITMQ_URL ||
@@ -95,6 +96,13 @@ const run = async () => {
 
           try {
             const parsed = JSON.parse(payload);
+            const validation = validateAgainstSchema(
+              'events/review-commented.schema.json',
+              parsed,
+            );
+            if (!validation.valid) {
+              throw new Error(validation.error);
+            }
             const targetUser = parsed?.targetUser;
             const email = targetUser ? await fetchUserEmail(targetUser) : null;
             if (!email && !EMAIL_TO) {

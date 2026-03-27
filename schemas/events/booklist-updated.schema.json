@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://socialbook.local/schemas/events/booklist-updated.schema.json",
+  "title": "BooklistUpdatedEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ownerId", "targetUser", "booklistId", "booklistName", "action", "message"],
+  "properties": {
+    "ownerId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "targetUser": {
+      "type": "string",
+      "minLength": 1
+    },
+    "booklistId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "booklistName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action": {
+      "type": "string",
+      "enum": ["created", "item_added"]
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

@@ -100,6 +100,9 @@ export class BooklistsController {
       throw new HttpException({ error: 'Missing required fields' }, HttpStatus.BAD_REQUEST);
     }
     const item = await this.booklistsService.addItem(booklistId, ownerId, body);
+    if (!item) {
+      throw new HttpException({ error: 'Booklist not found' }, HttpStatus.NOT_FOUND);
+    }
     return item;
   }
 

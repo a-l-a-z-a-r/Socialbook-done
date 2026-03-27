@@ -17,4 +17,10 @@ export class FriendsService {
     const created = await this.friendModel.create({ ownerId, friendId });
     return created.toObject();
   }
+
+  async listFollowers(friendId: string) {
+    if (!friendId) return [];
+    const followers = await this.friendModel.find({ friendId }).sort({ createdAt: -1 }).lean().exec();
+    return followers.map((entry) => entry.ownerId).filter(Boolean);
+  }
 }

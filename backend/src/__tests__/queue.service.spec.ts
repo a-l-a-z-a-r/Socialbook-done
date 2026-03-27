@@ -14,7 +14,17 @@ describe('QueueService', () => {
     const service = new QueueService();
     const ack = jest.fn();
     (service as any).channel = { ack, nack: jest.fn() };
-    const message = { content: Buffer.from('{"ok":true}') } as any;
+    const message = {
+      content: Buffer.from(
+        JSON.stringify({
+          user: 'mila',
+          action: 'reviewed',
+          book: 'Station Eleven',
+          status: 'finished',
+          created_at: '2026-03-27T12:00:00.000Z',
+        }),
+      ),
+    } as any;
 
     (service as any).handleMessage(message, 'notifications');
 

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://socialbook.local/schemas/events/review-created.schema.json",
+  "title": "ReviewCreatedEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["user", "action", "book", "status", "created_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "user": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action": {
+      "type": "string",
+      "const": "reviewed"
+    },
+    "book": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "review": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "coverUrl": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

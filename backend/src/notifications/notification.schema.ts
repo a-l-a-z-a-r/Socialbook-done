@@ -18,7 +18,13 @@ export class Notification {
   reviewId?: string;
 
   @Prop()
+  booklistId?: string;
+
+  @Prop()
   commentId?: string;
+
+  @Prop()
+  type?: string;
 
   @Prop({ default: false })
   read!: boolean;

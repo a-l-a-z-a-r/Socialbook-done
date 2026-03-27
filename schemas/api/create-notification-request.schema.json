@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://socialbook.local/schemas/api/create-notification-request.schema.json",
+  "title": "CreateNotificationRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["targetUser"],
+  "properties": {
+    "targetUser": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "booklistId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "commentId": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

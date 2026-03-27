@@ -1636,9 +1636,13 @@ const App = () => {
                       <li key={item._id}>
                         <div>
                           <p className="title">
-                            {item.actor || 'Someone'} replied to your comment
+                            {item.type === 'booklist.updated'
+                              ? `${item.actor || 'Someone'} updated a booklist`
+                              : `${item.actor || 'Someone'} replied to your comment`}
                           </p>
-                          <p className="meta">{item.message || 'New reply'}</p>
+                          <p className="meta">
+                            {item.message || (item.type === 'booklist.updated' ? 'Booklist updated' : 'New reply')}
+                          </p>
                         </div>
                         <span className="meta">{formatRefreshTime(item.created_at)}</span>
                       </li>

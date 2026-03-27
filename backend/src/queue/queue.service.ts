@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import amqplib = require('amqplib');
 import { Channel, Connection, ConsumeMessage } from 'amqplib';
+import { validateAgainstSchema } from '../schema/schema-validator';
 
 type ReviewCreatedPayload = {
   user?: string;
@@ -16,6 +17,24 @@ type ImportRequestedPayload = {
   query: string;
   source?: string;
   requestedBy?: string;
+};
+
+type ReviewCommentedPayload = {
+  reviewId: string;
+  commentId: string;
+  parentCommentId?: string;
+  user: string;
+  message: string;
+  targetUser: string;
+};
+
+type BooklistUpdatedPayload = {
+  ownerId: string;
+  targetUser: string;
+  booklistId: string;
+  booklistName: string;
+  action: 'created' | 'item_added';
+  message: string;
 };
 
 @Injectable()
@@ -36,6 +55,7 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
     reviewCreated: 'review.created',
     importRequested: 'import.requested',
     commentCreated: 'review.commented',
+    booklistUpdated: 'booklist.updated',
   };
 
   private getRabbitUrl() {
@@ -64,15 +84,35 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
   }
 
   async publishReviewCreated(payload: ReviewCreatedPayload) {
-    return this.publish(this.routingKeys.reviewCreated, payload);
+    return this.publish(
+      this.routingKeys.reviewCreated,
+      payload,
+      'events/review-created.schema.json',
+    );
   }
 
-  async publishReviewCommented(payload: Record<string, unknown>) {
-    return this.publish(this.routingKeys.commentCreated, payload);
+  async publishReviewCommented(payload: ReviewCommentedPayload) {
+    return this.publish(
+      this.routingKeys.commentCreated,
+      payload,
+      'events/review-commented.schema.json',
+    );
   }
 
   async enqueueImport(payload: ImportRequestedPayload) {
-    return this.publish(this.routingKeys.importRequested, payload);
+    return this.publish(
+      this.routingKeys.importRequested,
+      payload,
+      'events/import-requested.schema.json',
+    );
+  }
+
+  async publishBooklistUpdated(payload: BooklistUpdatedPayload) {
+    return this.publish(
+      this.routingKeys.booklistUpdated,
+      payload,
+      'events/booklist-updated.schema.json',
+    );
   }
 
   private async connect() {
@@ -88,15 +128,25 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
     await this.channel.assertQueue(this.queues.fanout, { durable: true });
     await this.channel.assertQueue(this.queues.comments, { durable: true });
     await this.channel.bindQueue(this.queues.notifications, this.exchange, this.routingKeys.reviewCreated);
+    await this.channel.bindQueue(this.queues.notifications, this.exchange, this.routingKeys.booklistUpdated);
     await this.channel.bindQueue(this.queues.recommendations, this.exchange, this.routingKeys.reviewCreated);
     await this.channel.bindQueue(this.queues.fanout, this.exchange, this.routingKeys.reviewCreated);
     await this.channel.bindQueue(this.queues.imports, this.exchange, this.routingKeys.importRequested);
     await this.channel.bindQueue(this.queues.comments, this.exchange, this.routingKeys.commentCreated);
   }
 
-  private async publish(routingKey: string, payload: Record<string, unknown>) {
+  private async publish(
+    routingKey: string,
+    payload: Record<string, unknown>,
+    schemaPath: string,
+  ) {
     if (!this.channel) {
       this.logger.warn('RabbitMQ channel not ready; skipping publish.');
+      return;
+    }
+    const validation = validateAgainstSchema(schemaPath, payload);
+    if (!validation.valid) {
+      this.logger.warn(`Invalid payload for ${routingKey}: ${validation.error}`);
       return;
     }
     const body = Buffer.from(JSON.stringify(payload));
@@ -126,11 +176,44 @@ export class QueueService implements OnModuleInit, OnModuleDestroy {
     if (!message || !this.channel) return;
     try {
       const payload = JSON.parse(message.content.toString());
+      const schemaPath =
+        queue === 'notifications'
+          ? this.getNotificationsSchema(payload as Record<string, unknown>)
+          : this.getQueueSchema(queue);
+      if (schemaPath) {
+        const validation = validateAgainstSchema(schemaPath, payload);
+        if (!validation.valid) {
+          throw new Error(validation.error);
+        }
+      }
       this.logger.log(`[${queue}] ${JSON.stringify(payload)}`);
       this.channel.ack(message);
     } catch (err) {
       this.logger.error(`[${queue}] failed to process message`, err as Error);
       this.channel.nack(message, false, false);
     }
+  }
+
+  private getQueueSchema(queue: string) {
+    if (queue === 'notifications') {
+      return null;
+    }
+    if (queue === 'recommendations' || queue === 'fanout') {
+      return 'events/review-created.schema.json';
+    }
+    if (queue === 'imports') {
+      return 'events/import-requested.schema.json';
+    }
+    if (queue === 'comments') {
+      return 'events/review-commented.schema.json';
+    }
+    return null;
+  }
+
+  private getNotificationsSchema(payload: Record<string, unknown>) {
+    if (payload.booklistId) {
+      return 'events/booklist-updated.schema.json';
+    }
+    return 'events/review-created.schema.json';
   }
 }

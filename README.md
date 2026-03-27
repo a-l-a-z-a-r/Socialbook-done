@@ -11,6 +11,19 @@ The backend is deployed as dedicated microservices (reviews, users, social, noti
 
 Argo CD Application manifests for the microservices live at `k8s/argocd/socialbook-apps.yaml`.
 
+## Shared Schemas
+
+JSON Schema contracts for shared event and internal API payloads live in `schemas/`.
+These currently cover:
+
+- `schemas/events/review-created.schema.json`
+- `schemas/events/review-commented.schema.json`
+- `schemas/events/booklist-updated.schema.json`
+- `schemas/events/import-requested.schema.json`
+- `schemas/api/create-notification-request.schema.json`
+
+The reviews service validates event payloads before publishing, and the workers plus notifications API validate them again on consume/request boundaries.
+
 ## Viewing Coverage Reports
 
 Generate HTML coverage report:

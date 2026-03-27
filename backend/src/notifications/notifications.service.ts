@@ -8,7 +8,9 @@ type CreateNotificationPayload = {
   actor?: string;
   message?: string;
   reviewId?: string;
+  booklistId?: string;
   commentId?: string;
+  type?: string;
 };
 
 @Injectable()
@@ -24,7 +26,9 @@ export class NotificationsService {
       actor: payload.actor,
       message: payload.message,
       reviewId: payload.reviewId,
+      booklistId: payload.booklistId,
       commentId: payload.commentId,
+      type: payload.type,
       read: false,
     });
     return created.toObject();
