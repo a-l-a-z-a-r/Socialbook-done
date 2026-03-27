@@ -5,7 +5,7 @@ image:
   tag: latest
   pullPolicy: Always
 
-rolloutId: "frontend-64e6892"
+rolloutId: "frontend-1653846"
 
 service:
   type: ClusterIP
