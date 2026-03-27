@@ -454,8 +454,8 @@ spec:
               value: socialbook.events
             - name: RABBITMQ_QUEUE
               value: socialbook.notifications
-            - name: RABBITMQ_ROUTING_KEY
-              value: review.commented
+            - name: RABBITMQ_ROUTING_KEYS
+              value: review.commented,booklist.updated
             - name: NOTIFICATIONS_API_URL
               value: http://socialbook-notifications:5000/internal/notifications
 ---

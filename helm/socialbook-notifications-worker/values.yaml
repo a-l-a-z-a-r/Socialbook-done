@@ -14,5 +14,5 @@ env:
   RABBITMQ_URL: amqp://admin:HelloWorld123@rabbitmq-service-api.rabbitmq.svc.cluster.local:5672
   RABBITMQ_EXCHANGE: socialbook.events
   RABBITMQ_QUEUE: socialbook.notifications
-  RABBITMQ_ROUTING_KEY: review.commented
+  RABBITMQ_ROUTING_KEYS: review.commented,booklist.updated
   NOTIFICATIONS_API_URL: http://socialbook-notifications:5000/internal/notifications
