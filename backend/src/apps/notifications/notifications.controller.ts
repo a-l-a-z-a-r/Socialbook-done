@@ -70,9 +70,10 @@ export class NotificationsController {
     if (!validation.valid) {
       throw new HttpException({ error: validation.error }, HttpStatus.BAD_REQUEST);
     }
+    const targetUser = body.targetUser as string;
 
     const notification = await this.notificationsService.create({
-      user: body.targetUser,
+      user: targetUser,
       actor: body.actor,
       message: body.message,
       reviewId: body.reviewId,
