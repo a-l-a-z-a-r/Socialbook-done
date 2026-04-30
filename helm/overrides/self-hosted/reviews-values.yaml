@@ -1,6 +1,6 @@
 image:
   repository: alazar111/socialbook-backend
-  tag: backend-69547c54eaba8c731fe99ad5e9e9d0b42ad44d12
+  tag: backend-bea133d4cd34fee578c4d6540b4f9b69d74c88ed
 
 env:
   MONGODB_URI: mongodb://socialbook-mongo-reviews:27017/reviews
