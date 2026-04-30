@@ -1,6 +1,6 @@
 image:
   repository: alazar111/socialbook-notifications-worker
-  tag: worker-9cc4f1a414171a5750bdf0504b258b75600f6090
+  tag: worker-69547c54eaba8c731fe99ad5e9e9d0b42ad44d12
 
 env:
   RABBITMQ_URL: amqp://socialbook:CHANGE_ME@rabbitmq-service-api:5672
