@@ -5,7 +5,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: {{ .Values.postgres.storageClassName }}
+  storageClassName: {{ .Values.postgres.storageClassName | quote }}
   resources:
     requests:
-      storage: {{ .Values.postgres.storage }} 
+      storage: {{ .Values.postgres.storage | quote }}

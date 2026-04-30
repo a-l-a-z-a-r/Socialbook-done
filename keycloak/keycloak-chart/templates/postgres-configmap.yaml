@@ -5,7 +5,5 @@ metadata:
   labels:
     app: postgres
 data:
-  POSTGRES_USER: {{ .Values.postgres.user | quote }}
-  POSTGRES_PASSWORD: {{ .Values.postgres.password | quote }}
-  PGDATA: /var/lib/postgresql/data
+  PGDATA: /var/lib/postgresql/data/pgdata
   TZ: {{ .Values.postgres.timezone | quote }}

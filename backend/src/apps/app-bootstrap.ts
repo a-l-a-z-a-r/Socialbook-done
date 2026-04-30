@@ -8,6 +8,7 @@ import {
   Histogram,
   Registry,
 } from 'prom-client';
+import { getAllowedCorsOrigins } from '../config/cors-origins';
 
 type SwaggerConfig = {
   title: string;
@@ -39,14 +40,7 @@ export function applyCommonAppMiddleware(
     next();
   });
   app.enableCors({
-    origin: [
-      'http://localhost:8080',
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      'http://46.62.130.16:30090',
-      'http://socialbook.ltu-m7011e-11.se',
-      'https://socialbook.ltu-m7011e-11.se',
-    ],
+    origin: getAllowedCorsOrigins(),
     allowedHeaders: ['Content-Type', 'Authorization'],
     exposedHeaders: ['X-Neon'],
   });

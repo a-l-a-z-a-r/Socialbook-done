@@ -1,6 +1,56 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: keycloak
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    targetRevision: Dev
+    path: keycloak/keycloak-chart
+    helm:
+      valueFiles:
+        - ../../helm/overrides/self-hosted/keycloak-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: keycloak
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rabbitmq
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    targetRevision: Dev
+    path: RabbitMQ
+    helm:
+      valueFiles:
+        - ../helm/overrides/self-hosted/rabbitmq-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: socialbook
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: socialbook-mongo-reviews
   namespace: argocd
 spec:
@@ -120,6 +170,9 @@ spec:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
     targetRevision: Dev
     path: helm/socialbook-reviews
+    helm:
+      valueFiles:
+        - ../overrides/self-hosted/reviews-values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: socialbook
@@ -147,6 +200,9 @@ spec:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
     targetRevision: Dev
     path: helm/socialbook-users
+    helm:
+      valueFiles:
+        - ../overrides/self-hosted/users-values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: socialbook
@@ -174,6 +230,9 @@ spec:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
     targetRevision: Dev
     path: helm/socialbook-social
+    helm:
+      valueFiles:
+        - ../overrides/self-hosted/social-values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: socialbook
@@ -201,6 +260,9 @@ spec:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
     targetRevision: Dev
     path: helm/socialbook-booklists
+    helm:
+      valueFiles:
+        - ../overrides/self-hosted/booklists-values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: socialbook
@@ -228,6 +290,9 @@ spec:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
     targetRevision: Dev
     path: helm/socialbook-notifications
+    helm:
+      valueFiles:
+        - ../overrides/self-hosted/notifications-values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: socialbook
@@ -255,6 +320,9 @@ spec:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
     targetRevision: Dev
     path: helm/socialbook-frontend
+    helm:
+      valueFiles:
+        - ../overrides/self-hosted/frontend-values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: socialbook
@@ -282,6 +350,9 @@ spec:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
     targetRevision: Dev
     path: helm/socialbook-notifications-worker
+    helm:
+      valueFiles:
+        - ../overrides/self-hosted/notifications-worker-values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: socialbook
@@ -303,6 +374,9 @@ spec:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
     targetRevision: Dev
     path: helm/socialbook-ingress
+    helm:
+      valueFiles:
+        - ../overrides/self-hosted/ingress-values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: socialbook

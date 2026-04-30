@@ -7,7 +7,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
-  ingressClassName: traefik
+  ingressClassName: {{ .Values.ingress.className }}
   rules:
   - host: {{ .Values.domain }}
     http:
@@ -18,8 +18,8 @@ spec:
           service:
             name: keycloak
             port:
-              number: 8080
+              number: {{ .Values.service.port }}
   tls:
   - hosts:
     - {{ .Values.domain }}
-    secretName: keycloak-tls
+    secretName: {{ .Values.ingress.tlsSecretName }}

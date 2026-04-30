@@ -1,0 +1,12 @@
+image:
+  repository: yourdockerhub/socialbook-backend
+  tag: latest
+
+env:
+  MONGODB_URI: mongodb://socialbook-mongo-users:27017/users
+  KEYCLOAK_URL: https://keycloak.204-168-223-99.nip.io
+  KEYCLOAK_REALM: Userenter
+  KEYCLOAK_ADMIN_CLIENT_ID: socialbook-admin
+  KEYCLOAK_ADMIN_CLIENT_SECRET: CHANGE_ME
+  KEYCLOAK_PUBLIC_CLIENT_ID: socialbook
+  CORS_ALLOWED_ORIGINS: https://socialbook.204-168-223-99.nip.io

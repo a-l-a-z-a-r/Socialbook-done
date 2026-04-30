@@ -1,0 +1,10 @@
+image:
+  repository: yourdockerhub/socialbook-notifications-worker
+  tag: latest
+
+env:
+  RABBITMQ_URL: amqp://socialbook:CHANGE_ME@rabbitmq-service-api:5672
+  RABBITMQ_EXCHANGE: socialbook.events
+  RABBITMQ_QUEUE: socialbook.notifications
+  RABBITMQ_ROUTING_KEYS: review.commented,booklist.updated
+  NOTIFICATIONS_API_URL: http://socialbook-notifications:5000/internal/notifications

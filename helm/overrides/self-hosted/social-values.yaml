@@ -1,0 +1,10 @@
+image:
+  repository: yourdockerhub/socialbook-backend
+  tag: latest
+
+env:
+  MONGODB_URI: mongodb://socialbook-mongo-social:27017/social
+  KEYCLOAK_URL: https://keycloak.204-168-223-99.nip.io
+  KEYCLOAK_REALM: Userenter
+  BOOKLISTS_SERVICE_URL: http://socialbook-booklists:5000
+  CORS_ALLOWED_ORIGINS: https://socialbook.204-168-223-99.nip.io

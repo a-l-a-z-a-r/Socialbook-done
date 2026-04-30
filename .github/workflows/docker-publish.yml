@@ -60,48 +60,73 @@ jobs:
           import re
 
           version = "${{ github.sha }}"
-          backend_image = f"${{ env.DOCKERHUB_USERNAME }}/socialbook-backend:backend-{version}"
-          frontend_image = f"${{ env.DOCKERHUB_USERNAME }}/socialbook-frontend:frontend-{version}"
-          worker_image = f"${{ env.DOCKERHUB_USERNAME }}/socialbook-notifications-worker:worker-{version}"
+          backend_repo = "${{ env.DOCKERHUB_USERNAME }}/socialbook-backend"
+          frontend_repo = "${{ env.DOCKERHUB_USERNAME }}/socialbook-frontend"
+          worker_repo = "${{ env.DOCKERHUB_USERNAME }}/socialbook-notifications-worker"
+          backend_tag = f"backend-{version}"
+          frontend_tag = f"frontend-{version}"
+          worker_tag = f"worker-{version}"
 
-          path = Path("k8s/socialbook.yaml")
-          data = path.read_text()
-          data = re.sub(
-              r"(?m)^(\\s*image:\\s+).*/socialbook-backend:[^\\s]+",
-              lambda m: f"{m.group(1)}{backend_image}",
-              data,
-          )
-          data = re.sub(
-              r"(?m)^(\\s*image:\\s+).*/socialbook-frontend:[^\\s]+",
-              lambda m: f"{m.group(1)}{frontend_image}",
-              data,
-          )
-          data = re.sub(
-              r"(?m)^(\\s*image:\\s+).*/socialbook-notifications-worker:[^\\s]+",
-              lambda m: f"{m.group(1)}{worker_image}",
-              data,
-          )
-          data = re.sub(
-              r"(?m)^(\\s*app.kubernetes.io/version:\\s+).*$",
-              lambda m: f'{m.group(1)}"{version}"',
-              data,
-          )
-          path.write_text(data)
+          backend_values_files = [
+              Path("helm/overrides/self-hosted/reviews-values.yaml"),
+              Path("helm/overrides/self-hosted/users-values.yaml"),
+              Path("helm/overrides/self-hosted/social-values.yaml"),
+              Path("helm/overrides/self-hosted/notifications-values.yaml"),
+              Path("helm/overrides/self-hosted/booklists-values.yaml"),
+          ]
 
-          values_path = Path("helm/socialbook-frontend/values.yaml")
-          values = values_path.read_text()
-          if re.search(r"(?m)^rolloutId:", values):
-              values = re.sub(r"(?m)^rolloutId:.*$", f'rolloutId: "{version}"', values)
-          else:
-              values = values.rstrip() + f'\n\nrolloutId: "{version}"\n'
-          values_path.write_text(values)
+          def replace_or_append(pattern, replacement, text):
+              if re.search(pattern, text, flags=re.MULTILINE):
+                  return re.sub(pattern, replacement, text, flags=re.MULTILINE)
+              return text.rstrip() + "\n" + replacement + "\n"
+
+          for path in backend_values_files:
+              data = path.read_text()
+              data = re.sub(r'(?m)^(\s*repository:\s*).*$',
+                            lambda m: f'{m.group(1)}{backend_repo}', data, count=1)
+              data = re.sub(r'(?m)^(\s*tag:\s*).*$',
+                            lambda m: f'{m.group(1)}{backend_tag}', data, count=1)
+              path.write_text(data)
+
+          frontend_path = Path("helm/overrides/self-hosted/frontend-values.yaml")
+          frontend_values = frontend_path.read_text()
+          frontend_values = re.sub(r'(?m)^(\s*repository:\s*).*$',
+                                   lambda m: f'{m.group(1)}{frontend_repo}', frontend_values, count=1)
+          frontend_values = re.sub(r'(?m)^(\s*tag:\s*).*$',
+                                   lambda m: f'{m.group(1)}{frontend_tag}', frontend_values, count=1)
+          frontend_values = replace_or_append(
+              r'(?m)^rolloutId:.*$',
+              f'rolloutId: "{version}"',
+              frontend_values,
+          )
+          frontend_values = re.sub(
+              r'(?m)^(\s*FRONTEND_IMAGE_TAG:\s*).*$',
+              lambda m: f'{m.group(1)}"{frontend_tag}"',
+              frontend_values,
+          )
+          frontend_path.write_text(frontend_values)
+
+          worker_path = Path("helm/overrides/self-hosted/notifications-worker-values.yaml")
+          worker_values = worker_path.read_text()
+          worker_values = re.sub(r'(?m)^(\s*repository:\s*).*$',
+                                 lambda m: f'{m.group(1)}{worker_repo}', worker_values, count=1)
+          worker_values = re.sub(r'(?m)^(\s*tag:\s*).*$',
+                                 lambda m: f'{m.group(1)}{worker_tag}', worker_values, count=1)
+          worker_path.write_text(worker_values)
           PY
 
       - name: Commit manifest updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add k8s/socialbook.yaml helm/socialbook-frontend/values.yaml
+          git add \
+            helm/overrides/self-hosted/reviews-values.yaml \
+            helm/overrides/self-hosted/users-values.yaml \
+            helm/overrides/self-hosted/social-values.yaml \
+            helm/overrides/self-hosted/notifications-values.yaml \
+            helm/overrides/self-hosted/booklists-values.yaml \
+            helm/overrides/self-hosted/frontend-values.yaml \
+            helm/overrides/self-hosted/notifications-worker-values.yaml
           git commit -m "chore: bump images to ${{ github.sha }}" || exit 0
           git fetch origin Dev
           git pull --rebase origin Dev
