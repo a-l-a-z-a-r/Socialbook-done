@@ -12,6 +12,7 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main.js",
     "seed:openlibrary": "node scripts/seed-openlibrary.js",
+    "seed:openlibrary:validated": "bash tools/seed-openlibrary-and-audit.sh",
     "test": "jest --coverage --runInBand"
   },
   "dependencies": {

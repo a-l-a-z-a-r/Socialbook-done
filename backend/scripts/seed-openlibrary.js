@@ -40,8 +40,55 @@ const QUERY = 'subject:fiction'; // broad query to gather many ISBNs
 const SEARCH_URL = `https://openlibrary.org/search.json?q=${encodeURIComponent(
   QUERY,
 )}&limit=${LIMIT}&fields=title,author_name,isbn`;
+const MIN_COVER_BYTES = Number(process.env.COVER_MIN_BYTES || 2048);
+const COVER_TIMEOUT_MS = Number(process.env.COVER_TIMEOUT_MS || 5000);
 
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/socialbook';
+
+function probeCover(url) {
+  return new Promise((resolve) => {
+    const request = https.get(
+      url,
+      {
+        headers: { Range: `bytes=0-${MIN_COVER_BYTES - 1}` },
+      },
+      (res) => {
+        const contentType = String(res.headers['content-type'] || '').toLowerCase();
+        const contentLength = Number(res.headers['content-length'] || 0);
+
+        if (!contentType.startsWith('image/') || contentType.includes('image/gif')) {
+          res.resume();
+          resolve(false);
+          return;
+        }
+
+        if (Number.isFinite(contentLength) && contentLength >= MIN_COVER_BYTES) {
+          res.resume();
+          resolve(true);
+          return;
+        }
+
+        const chunks = [];
+        let total = 0;
+        res.on('data', (chunk) => {
+          chunks.push(chunk);
+          total += chunk.length;
+          if (total >= MIN_COVER_BYTES) {
+            request.destroy();
+            resolve(true);
+          }
+        });
+        res.on('end', () => resolve(total >= MIN_COVER_BYTES));
+      },
+    );
+
+    request.setTimeout(COVER_TIMEOUT_MS, () => {
+      request.destroy();
+      resolve(false);
+    });
+    request.on('error', () => resolve(false));
+  });
+}
 
 async function fetchBooks() {
   const data = await fetchJson(SEARCH_URL);
@@ -61,6 +108,10 @@ async function fetchBooks() {
     const rating = Number((3 + Math.random() * 2).toFixed(1)); // 3.0–5.0
     const created = new Date().toISOString();
 
+    const coverUrl = `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+    const coverOk = await probeCover(coverUrl);
+    if (!coverOk) continue;
+
     books.push({
       user: 'OpenLibrary',
       book: title,
@@ -69,7 +120,7 @@ async function fetchBooks() {
       genre: 'OpenLibrary',
       status: 'finished',
       created_at: created,
-      coverUrl: `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`,
+      coverUrl,
     });
 
     if (books.length >= LIMIT) break;

@@ -1,20 +1,21 @@
-/* Seed MongoDB with book reviews fetched from Open Library Search API.
+/* Seed MongoDB with booklist data fetched from Open Library Search API.
  *
  * Usage:
- *   MONGODB_URI="mongodb://localhost:27017/socialbook" node scripts/seed-openlibrary.js
+ *   MONGODB_URI="mongodb://localhost:27017/booklists" node scripts/seed-openlibrary.js
  *
  * Notes:
  * - Requires network access to openlibrary.org.
  * - Uses the MongoDB URI provided (defaults to localhost).
- * - Inserts up to 500 review documents into the `reviews` collection.
+ * - Creates one booklist and inserts up to 500 items into `booklistitems`.
  */
 
 // Prefer a local dependency when available; fall back to backend node_modules.
 let MongoClient;
+let ObjectId;
 try {
-  ({ MongoClient } = require('mongodb'));
+  ({ MongoClient, ObjectId } = require('mongodb'));
 } catch (err) {
-  ({ MongoClient } = require('../backend/node_modules/mongodb'));
+  ({ MongoClient, ObjectId } = require('../backend/node_modules/mongodb'));
 }
 const https = require('https');
 
@@ -47,7 +48,12 @@ const SEARCH_URL = `https://openlibrary.org/search.json?q=${encodeURIComponent(
   QUERY,
 )}&limit=${LIMIT}&fields=title,author_name,isbn`;
 
-const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/socialbook';
+const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/booklists';
+const ownerId = process.env.BOOKLIST_OWNER_ID || 'OpenLibrary';
+const booklistName = process.env.BOOKLIST_NAME || 'Open Library Fiction';
+const booklistDescription =
+  process.env.BOOKLIST_DESCRIPTION || 'Seeded from Open Library cover images';
+const visibility = process.env.BOOKLIST_VISIBILITY || 'public';
 
 async function fetchBooks() {
   const data = await fetchJson(SEARCH_URL);
@@ -64,17 +70,9 @@ async function fetchBooks() {
 
     const title = doc.title || 'Unknown title';
     const author = Array.isArray(doc.author_name) && doc.author_name.length > 0 ? doc.author_name[0] : 'Unknown author';
-    const rating = Number((3 + Math.random() * 2).toFixed(1)); // 3.0–5.0
-    const created = new Date().toISOString();
-
     books.push({
-      user: 'OpenLibrary',
-      book: title,
-      rating,
-      review: `${author} via Open Library`,
-      genre: 'OpenLibrary',
-      status: 'finished',
-      created_at: created,
+      title,
+      author,
       coverUrl: `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`,
     });
 
@@ -91,12 +89,43 @@ async function seed() {
 
   const client = new MongoClient(uri);
   await client.connect();
-  const dbName = client.db().databaseName || 'socialbook';
+  const dbName = client.db().databaseName || 'booklists';
   const db = client.db(dbName);
-  const collection = db.collection('reviews');
+  const booklists = db.collection('booklists');
+  const items = db.collection('booklistitems');
 
-  const result = await collection.insertMany(books, { ordered: false });
-  console.log(`Inserted ${result.insertedCount} documents into ${dbName}.reviews`);
+  const now = new Date();
+  const booklistId = new ObjectId();
+  const listDoc = {
+    _id: booklistId,
+    ownerId,
+    name: booklistName,
+    description: booklistDescription,
+    visibility,
+    coverUrl: books[0]?.coverUrl || undefined,
+    totalItems: books.length,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const itemDocs = books.map((book, index) => ({
+    booklistId: booklistId.toString(),
+    bookId: book.title,
+    addedById: ownerId,
+    position: index,
+    notes: `${book.author} via Open Library`,
+    coverUrl: book.coverUrl,
+    addedAt: now,
+  }));
+
+  await booklists.deleteMany({ ownerId, name: booklistName });
+  const listResult = await booklists.insertOne(listDoc);
+  const itemResult = itemDocs.length
+    ? await items.insertMany(itemDocs, { ordered: false })
+    : { insertedCount: 0 };
+
+  console.log(`Inserted booklist ${listResult.insertedId} into ${dbName}.booklists`);
+  console.log(`Inserted ${itemResult.insertedCount} documents into ${dbName}.booklistitems`);
 
   await client.close();
 }
