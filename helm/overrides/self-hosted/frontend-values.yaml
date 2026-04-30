@@ -1,8 +1,8 @@
 replicaCount: 1
 
 image:
-  repository: yourdockerhub/socialbook-frontend
-  tag: latest
+  repository: alazar111/socialbook-frontend
+  tag: frontend-96b02e07fd640c7d9548c144342aeb8c456807c9
 
 env:
   VITE_API_BASE: /api
@@ -14,4 +14,5 @@ env:
   SOCIAL_UPSTREAM: socialbook-social:5000
   NOTIFICATIONS_UPSTREAM: socialbook-notifications:5000
   BOOKLISTS_UPSTREAM: socialbook-booklists:5000
-  FRONTEND_IMAGE_TAG: latest
+  FRONTEND_IMAGE_TAG: "frontend-96b02e07fd640c7d9548c144342aeb8c456807c9"
+rolloutId: "96b02e07fd640c7d9548c144342aeb8c456807c9"

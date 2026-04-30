@@ -1,6 +1,6 @@
 image:
-  repository: yourdockerhub/socialbook-backend
-  tag: latest
+  repository: alazar111/socialbook-backend
+  tag: backend-96b02e07fd640c7d9548c144342aeb8c456807c9
 
 env:
   MONGODB_URI: mongodb://socialbook-mongo-booklists:27017/booklists

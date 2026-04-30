@@ -1,6 +1,6 @@
 image:
-  repository: yourdockerhub/socialbook-notifications-worker
-  tag: latest
+  repository: alazar111/socialbook-notifications-worker
+  tag: worker-96b02e07fd640c7d9548c144342aeb8c456807c9
 
 env:
   RABBITMQ_URL: amqp://socialbook:CHANGE_ME@rabbitmq-service-api:5672
