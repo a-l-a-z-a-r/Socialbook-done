@@ -16,6 +16,7 @@ const keyFor = (item) =>
 const AUTH_DISABLED = false;
 const MIN_COVER_BYTES = 2048;
 const COVER_TIMEOUT_MS = 5000;
+const AUTH_NOTICE_TIMEOUT_MS = 5000;
 
 const authFetch = async (path, token, options = {}) => {
   if (!token) {
@@ -130,6 +131,7 @@ const App = () => {
   const [authState, setAuthState] = useState({ loading: true, authenticated: false });
   const [profile, setProfile] = useState(null);
   const [authError, setAuthError] = useState('');
+  const [authNotice, setAuthNotice] = useState(null);
   const [feed, setFeed] = useState([]);
   const [feedSource, setFeedSource] = useState('feed');
   const [authView, setAuthView] = useState('signin');
@@ -187,6 +189,20 @@ const App = () => {
   const [replyState, setReplyState] = useState({ loading: false, error: '' });
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedItems, setExpandedItems] = useState(() => new Set());
+
+  useEffect(() => {
+    if (!authNotice) return undefined;
+    const timeout = window.setTimeout(() => {
+      setAuthNotice(null);
+    }, AUTH_NOTICE_TIMEOUT_MS);
+
+    return () => window.clearTimeout(timeout);
+  }, [authNotice]);
+
+  const showAuthNotice = (message, tone = 'error') => {
+    if (!message) return;
+    setAuthNotice({ message, tone });
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -602,10 +618,13 @@ const App = () => {
       setProfile({ username: loginForm.username });
       setAuthState({ loading: false, authenticated: true });
       setLoginState({ loading: false, error: '' });
+      setAuthNotice(null);
       navigate(DASHBOARD_PATH);
       loadFeed(data.access_token);
     } catch (err) {
-      setLoginState({ loading: false, error: err.message || 'Login failed.' });
+      const message = err.message || 'Login failed.';
+      setLoginState({ loading: false, error: message });
+      showAuthNotice(message);
     }
   };
 
@@ -1055,9 +1074,12 @@ const App = () => {
         throw new Error(message || `Signup failed: ${response.status}`);
       }
       setSignupState({ loading: false, error: '', success: true });
+      showAuthNotice('Account created. Sign in to continue.', 'success');
       setAuthView('signin');
     } catch (err) {
-      setSignupState({ loading: false, error: err.message || 'Signup failed.', success: false });
+      const message = err.message || 'Signup failed.';
+      setSignupState({ loading: false, error: message, success: false });
+      showAuthNotice(message);
     }
   };
 
@@ -1196,6 +1218,20 @@ const App = () => {
         </div>
       </header>
 
+      {authNotice && !authState.authenticated && (
+        <div className={`auth-notice auth-notice-${authNotice.tone}`} role="status" aria-live="polite">
+          <p>{authNotice.message}</p>
+          <button
+            className="auth-notice-close"
+            type="button"
+            onClick={() => setAuthNotice(null)}
+            aria-label="Dismiss message"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {authState.loading ? (
         <main className="auth-shell">
           <section className="auth-hero">
@@ -1289,10 +1325,6 @@ const App = () => {
                       required
                     />
                   </label>
-                  {signupState.error && <p className="empty-state">{signupState.error}</p>}
-                  {signupState.success && (
-                    <p className="empty-state">Account created. Sign in to continue.</p>
-                  )}
                   <button className="primary" type="submit" disabled={signupState.loading}>
                     {signupState.loading ? 'Creating...' : 'Create account'}
                   </button>
@@ -1345,7 +1377,6 @@ const App = () => {
                       required
                     />
                   </label>
-                  {loginState.error && <p className="empty-state">{loginState.error}</p>}
                   <button className="primary" type="submit" disabled={loginState.loading}>
                     {loginState.loading ? 'Signing in...' : 'Sign in'}
                   </button>
@@ -2147,9 +2178,6 @@ const App = () => {
                   <div>
                     <p className="label">For you</p>
                     <h3>Your listening queue, but for books.</h3>
-                    <p className="meta">
-                      Curate stacks, drop in your recent reads, and keep the feed rolling.
-                    </p>
                     <div className="actions">
                       <button className="cta" type="button" onClick={() => navigate(BOOKLISTS_PATH)}>
                         Open booklists

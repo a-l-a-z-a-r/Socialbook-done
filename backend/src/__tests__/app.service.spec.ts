@@ -61,7 +61,7 @@ describe('AppService', () => {
   });
 
   it('adds finished reviews to the shelf history', async () => {
-    const { service, reviewsService } = createService();
+    const { service, reviewsService, queueService } = createService();
     reviewsService.create.mockResolvedValue(makeReview({ book: 'New Book' }));
 
     await service.addReview({
@@ -76,6 +76,17 @@ describe('AppService', () => {
     const shelf = service.getShelf().shelf;
     expect(shelf.finished).toContain('New Book');
     expect(shelf.history[0].label).toBe('Recent');
+    expect(queueService.publishReviewCreated).toHaveBeenCalledWith({
+      id: 'review-id',
+      user: 'mila',
+      action: 'reviewed',
+      book: 'New Book',
+      rating: 5,
+      review: 'Great',
+      status: 'finished',
+      created_at: '2024-01-01T00:00:00.000Z',
+      coverUrl: 'https://example.com/cover.png',
+    });
   });
 
   it('returns null when adding a comment to a missing review', async () => {

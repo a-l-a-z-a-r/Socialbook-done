@@ -14,7 +14,6 @@ type FeedItem = {
   status: string;
   created_at: string;
   coverUrl?: string;
-  comments?: { user: string; message: string; created_at: string }[];
 };
 
 type Shelf = {
@@ -243,7 +242,6 @@ export class AppService {
       status: review.status ?? 'review',
       created_at: this.formatCreatedAt(review.created_at),
       coverUrl: review.coverUrl,
-      comments: [],
     };
   }
 
