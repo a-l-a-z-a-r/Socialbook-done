@@ -1,6 +1,6 @@
 image:
   repository: alazar111/socialbook-backend
-  tag: backend-bea133d4cd34fee578c4d6540b4f9b69d74c88ed
+  tag: backend-8c6f21b2e3a4bb4fc21aa5832201f3700d37bda8
 
 env:
   MONGODB_URI: mongodb://socialbook-mongo-booklists:27017/booklists
