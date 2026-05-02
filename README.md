@@ -9,6 +9,8 @@ Spotify but for books; ENJOY!!
 
 The backend is deployed as dedicated microservices (reviews, users, social, notifications, booklists) and the notifications worker. Each API service has its own MongoDB deployment, and cross-service calls go through Kubernetes services rather than in-process Nest imports. See `helm/README.md` for chart locations and install order.
 
+The application deployment source of truth is Helm. Legacy raw Kubernetes manifests for the Socialbook app stack have been removed; keep application deployment changes in `helm/` and `helm/overrides/`.
+
 Argo CD Application manifests for the microservices live at `k8s/argocd/socialbook-apps.yaml`.
 
 ## Shared Schemas

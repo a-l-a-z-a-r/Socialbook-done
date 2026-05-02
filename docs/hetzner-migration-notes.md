@@ -68,10 +68,10 @@ k3s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data
 
 These still contain LTU-specific values and should not be used as the deployment source for Hetzner:
 
-- `k8s/socialbook.yaml`
-- `k8s/socialbook-ingress.yaml`
 - `docker-compose.yml`
 - base chart values in `helm/socialbook-*/values.yaml`
+
+The legacy raw Kubernetes manifests for the Socialbook app stack were removed. Helm charts under `helm/` are now the only supported deployment source for the application workloads and ingress.
 
 ## Files To Use For Hetzner Deployment
 
@@ -92,7 +92,6 @@ These still contain LTU-specific values and should not be used as the deployment
 - Replace all `example.com` hostnames in self-hosted override files with the chosen `nip.io` hostnames.
 - Replace all `CHANGE_ME` values with real secrets.
 - Replace `yourdockerhub/...` placeholders with the real Docker Hub image names.
-- Update GitHub Actions so image-tag writeback modifies the self-hosted Helm override files instead of the old `k8s/socialbook.yaml`.
 - Apply `k8s/argocd/socialbook-apps.yaml` to the Hetzner cluster after the values are finalized.
 - Verify certificates, pod startup, and public routes for:
   - Argo CD
