@@ -204,6 +204,13 @@ The users service expects these env vars:
 - `KEYCLOAK_ADMIN_CLIENT_SECRET`
 - `KEYCLOAK_PUBLIC_CLIENT_ID`
 
+If `KEYCLOAK_ADMIN_CLIENT_SECRET` is not available yet, the users service can fall back to:
+
+- `KEYCLOAK_ADMIN_USERNAME`
+- `KEYCLOAK_ADMIN_PASSWORD`
+
+Use the fallback only as a temporary workaround. The preferred setup is still a confidential `socialbook-admin` client with service accounts enabled and a valid client secret.
+
 See [helm/socialbook-users/values.yaml](/home/alazar/Socialbook/helm/socialbook-users/values.yaml:14).
 
 ### 6. Deploy RabbitMQ

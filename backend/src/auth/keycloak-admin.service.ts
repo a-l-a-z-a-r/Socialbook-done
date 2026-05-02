@@ -15,7 +15,9 @@ type KeycloakConfig = {
   url: string;
   realm: string;
   clientId: string;
-  clientSecret: string;
+  clientSecret?: string;
+  adminUsername?: string;
+  adminPassword?: string;
 };
 
 @Injectable()
@@ -32,12 +34,21 @@ export class KeycloakAdminService {
     const realm = process.env.KEYCLOAK_REALM || 'myapp';
     const clientId = process.env.KEYCLOAK_ADMIN_CLIENT_ID;
     const clientSecret = process.env.KEYCLOAK_ADMIN_CLIENT_SECRET;
+    const adminUsername = process.env.KEYCLOAK_ADMIN_USERNAME;
+    const adminPassword = process.env.KEYCLOAK_ADMIN_PASSWORD;
 
-    if (!url || !clientId || !clientSecret) {
-      throw new Error('Keycloak admin client is not configured');
+    const hasClientCredentials = Boolean(
+      clientId && clientSecret && clientSecret !== 'CHANGE_ME',
+    );
+    const hasAdminPasswordGrant = Boolean(clientId && adminUsername && adminPassword);
+
+    if (!url || !realm || !clientId || (!hasClientCredentials && !hasAdminPasswordGrant)) {
+      throw new Error(
+        'Keycloak admin client is not configured. Set a valid KEYCLOAK_ADMIN_CLIENT_SECRET or provide KEYCLOAK_ADMIN_USERNAME and KEYCLOAK_ADMIN_PASSWORD.',
+      );
     }
 
-    this.config = { url, realm, clientId, clientSecret };
+    this.config = { url, realm, clientId, clientSecret, adminUsername, adminPassword };
     this.tokenUrl = new URL(`${url}/realms/${realm}/protocol/openid-connect/token`);
   }
 
@@ -194,25 +205,58 @@ export class KeycloakAdminService {
   }
 
   private async fetchAdminToken() {
-    const { clientId, clientSecret } = this.config!;
-    const params = new URLSearchParams({
-      grant_type: 'client_credentials',
-      client_id: clientId,
-      client_secret: clientSecret,
-    });
+    const { clientId, clientSecret, adminUsername, adminPassword } = this.config!;
 
-    const result = await this.request(
+    if (clientSecret && clientSecret !== 'CHANGE_ME') {
+      const result = await this.request(
+        'POST',
+        this.tokenUrl!,
+        { 'Content-Type': 'application/x-www-form-urlencoded' },
+        new URLSearchParams({
+          grant_type: 'client_credentials',
+          client_id: clientId,
+          client_secret: clientSecret,
+        }).toString(),
+      );
+
+      if (result.status >= 200 && result.status < 300) {
+        return this.parseAccessToken(result.body);
+      }
+
+      if (!adminUsername || !adminPassword) {
+        throw new Error(
+          `Keycloak token request failed (${result.status}). Check KEYCLOAK_ADMIN_CLIENT_SECRET and ensure client "${clientId}" is confidential with service accounts enabled.`,
+        );
+      }
+    }
+
+    if (!adminUsername || !adminPassword) {
+      throw new Error('Keycloak admin password grant is not configured');
+    }
+
+    const fallbackResult = await this.request(
       'POST',
       this.tokenUrl!,
       { 'Content-Type': 'application/x-www-form-urlencoded' },
-      params.toString(),
+      new URLSearchParams({
+        grant_type: 'password',
+        client_id: clientId,
+        username: adminUsername,
+        password: adminPassword,
+      }).toString(),
     );
 
-    if (result.status < 200 || result.status >= 300) {
-      throw new Error(`Keycloak token request failed (${result.status})`);
+    if (fallbackResult.status < 200 || fallbackResult.status >= 300) {
+      throw new Error(
+        `Keycloak token request failed (${fallbackResult.status}). Check admin client credentials and fallback admin username/password.`,
+      );
     }
 
-    const data = JSON.parse(result.body || '{}');
+    return this.parseAccessToken(fallbackResult.body);
+  }
+
+  private parseAccessToken(body: string) {
+    const data = JSON.parse(body || '{}');
     if (!data.access_token) {
       throw new Error('Keycloak token response missing access_token');
     }
