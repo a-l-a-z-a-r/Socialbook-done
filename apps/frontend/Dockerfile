@@ -4,7 +4,6 @@ WORKDIR /app
 COPY package*.json ./
 COPY vite.config.js ./
 COPY index.html ./
-COPY .env.production ./
 COPY src ./src
 
 RUN npm install
