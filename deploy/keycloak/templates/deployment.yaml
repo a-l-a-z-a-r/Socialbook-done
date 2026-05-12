@@ -23,7 +23,7 @@ spec:
             - --http-port=8080
             - --hostname=$(KC_HOSTNAME)
             - --hostname-strict=false
-            - --proxy-headers=xforwarded
+            - --proxy=edge
           env:
             - name: KC_DB
               value: {{ .Values.keycloak.database.vendor | quote }}
