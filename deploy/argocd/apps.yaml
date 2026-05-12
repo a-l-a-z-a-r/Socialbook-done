@@ -1,0 +1,187 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: socialbook-reviews
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    targetRevision: main
+    path: deploy/backend/chart
+    helm:
+      releaseName: socialbook-reviews
+      valueFiles:
+        - ../values/reviews.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: socialbook
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: socialbook-users
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    targetRevision: main
+    path: deploy/backend/chart
+    helm:
+      releaseName: socialbook-users
+      valueFiles:
+        - ../values/users.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: socialbook
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: socialbook-social
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    targetRevision: main
+    path: deploy/backend/chart
+    helm:
+      releaseName: socialbook-social
+      valueFiles:
+        - ../values/social.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: socialbook
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: socialbook-notifications
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    targetRevision: main
+    path: deploy/backend/chart
+    helm:
+      releaseName: socialbook-notifications
+      valueFiles:
+        - ../values/notifications.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: socialbook
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: socialbook-booklists
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    targetRevision: main
+    path: deploy/backend/chart
+    helm:
+      releaseName: socialbook-booklists
+      valueFiles:
+        - ../values/booklists.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: socialbook
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: socialbook-frontend
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    targetRevision: main
+    path: deploy/frontend
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: socialbook
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: socialbook-prometheus
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    targetRevision: main
+    path: deploy/prometheus
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: socialbook-grafana
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    targetRevision: main
+    path: deploy/grafana
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

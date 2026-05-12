@@ -1,0 +1,20 @@
+replicaCount: 1
+
+image:
+  repository: alazar111/socialbook-backend
+  tag: latest
+  pullPolicy: Always
+
+command:
+  - node
+  - dist/apps/reviews/main.js
+
+service:
+  type: ClusterIP
+  port: 5000
+
+env:
+  MONGODB_URI: mongodb://mongo-vm.example.internal:27017/reviews
+  KEYCLOAK_URL: https://keycloak.example.com
+  KEYCLOAK_REALM: Userenter
+  KEYCLOAK_PUBLIC_CLIENT_ID: socialbook

@@ -1,0 +1,39 @@
+replicaCount: 2
+
+image:
+  repository: alazar111/socialbook-frontend
+  tag: latest
+  pullPolicy: Always
+
+rolloutId: "frontend-minimal"
+
+service:
+  type: ClusterIP
+  port: 80
+
+env:
+  VITE_API_BASE: /api
+  VITE_KEYCLOAK_URL: https://keycloak.example.com
+  VITE_KEYCLOAK_REALM: Userenter
+  VITE_KEYCLOAK_CLIENT_ID: socialbook
+  REVIEWS_UPSTREAM: socialbook-reviews:5000
+  USERS_UPSTREAM: socialbook-users:5000
+  SOCIAL_UPSTREAM: socialbook-social:5000
+  NOTIFICATIONS_UPSTREAM: socialbook-notifications:5000
+  BOOKLISTS_UPSTREAM: socialbook-booklists:5000
+
+ingress:
+  className: traefik
+  host: socialbook.example.com
+  tls:
+    enabled: true
+    secretName: socialbook-tls
+
+apiPort: 5000
+
+apiServices:
+  reviews: socialbook-reviews
+  users: socialbook-users
+  social: socialbook-social
+  notifications: socialbook-notifications
+  booklists: socialbook-booklists

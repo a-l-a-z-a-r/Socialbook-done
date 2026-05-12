@@ -1,0 +1,13 @@
+replicaCount: 1
+
+command:
+  - node
+  - dist/apps/users/main.js
+
+env:
+  MONGODB_URI: mongodb://mongo-vm.example.internal:27017/users
+  KEYCLOAK_URL: https://keycloak.example.com
+  KEYCLOAK_REALM: Userenter
+  KEYCLOAK_ADMIN_CLIENT_ID: socialbook-admin
+  KEYCLOAK_ADMIN_CLIENT_SECRET: CHANGE_ME
+  KEYCLOAK_PUBLIC_CLIENT_ID: socialbook

@@ -1,0 +1,205 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /api/docs/reviews
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.reviews }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/docs/users
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.users }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/docs/social
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.social }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/docs/notifications
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.notifications }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/docs/booklists
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.booklists }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/feed
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.reviews }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/shelf
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.reviews }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/recommendations
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.reviews }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/reviews
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.reviews }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/books
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.reviews }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/comments
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.reviews }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/imports
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.reviews }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/health
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.reviews }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/reviews/health
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.reviews }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/signup
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.users }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/login
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.users }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/profile
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.users }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/users
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.users }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/users/health
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.users }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/admin
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.users }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/friends
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.social }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/notifications
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.notifications }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/notifications/health
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.notifications }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/social/health
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.social }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/booklists
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.booklists }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /api/booklists/health
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.apiServices.booklists }}
+                port:
+                  number: {{ .Values.apiPort }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}
+                port:
+                  number: {{ .Values.service.port }}
