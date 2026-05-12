@@ -1,13 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: alazar111/socialbook-backend
+  repository: alazar111/socialbook-reviews
   tag: latest
   pullPolicy: Always
-
-command:
-  - node
-  - dist/apps/reviews/main.js
 
 service:
   type: ClusterIP

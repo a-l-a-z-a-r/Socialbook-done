@@ -815,6 +815,25 @@ input:focus, textarea:focus, select:focus {
 }
 
 .auth-toggle { display: grid; grid-auto-flow: column; gap: 8px; }
+.danger-login-button {
+  width: min(100%, 320px);
+  min-height: 72px;
+  padding: 18px 24px;
+  border: none;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #ff4747, #b30000);
+  color: #fff7f7;
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 20px 40px rgba(179, 0, 0, 0.4);
+}
+.danger-login-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 24px 48px rgba(179, 0, 0, 0.48);
+}
 .tab {
   background: rgba(244, 246, 245, 0.08);
   color: var(--text);

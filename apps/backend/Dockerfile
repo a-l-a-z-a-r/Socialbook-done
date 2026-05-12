@@ -12,6 +12,9 @@ RUN npm run build
 FROM node:20-alpine
 WORKDIR /app
 
+ARG APP_ENTRY=dist/apps/reviews/main.js
+ENV APP_ENTRY=${APP_ENTRY}
+
 COPY package*.json ./
 RUN npm install --omit=dev
 
@@ -20,4 +23,4 @@ COPY schemas ./schemas
 
 EXPOSE 5000
 
-CMD ["node", "dist/main.js"]
+CMD ["sh", "-c", "node \"$APP_ENTRY\""]

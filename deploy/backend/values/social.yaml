@@ -1,8 +1,8 @@
-replicaCount: 1
+image:
+  repository: alazar111/socialbook-social
+  tag: latest
 
-command:
-  - node
-  - dist/apps/social/main.js
+replicaCount: 1
 
 env:
   MONGODB_URI: mongodb://mongo-vm.example.internal:27017/social

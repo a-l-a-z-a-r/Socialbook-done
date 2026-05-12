@@ -1339,6 +1339,13 @@ const App = () => {
               <p className="lede">Log in to see your personalized reading feed.</p>
                 {authError && <p className="empty-state">{authError}</p>}
                 <div className="actions">
+                  <button
+                    className="danger-login-button"
+                    type="button"
+                    onClick={(event) => event.preventDefault()}
+                  >
+                    Do Not Press
+                  </button>
                   {hasConfig && (
                     <>
                       <button className="cta" type="button" onClick={handleLogin}>

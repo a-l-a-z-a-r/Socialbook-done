@@ -20,7 +20,7 @@ Minimalized repository layout focused on the deployable application and monitori
 
 ## Backend Releases
 
-The backend chart is reused for these services:
+The backend chart is reused for these services, but each service now has its own image:
 
 - `socialbook-reviews`
 - `socialbook-users`
@@ -34,4 +34,5 @@ Service-specific values live in `deploy/backend/values`.
 
 - MongoDB is expected to run outside Kubernetes.
 - Keycloak and RabbitMQ are no longer part of this repository.
+- Old `socialbook-mongo-*` Argo CD applications should be removed from the cluster if you want zero database Pods in Kubernetes.
 - Generated output, experiments, and legacy deployment assets were intentionally removed.

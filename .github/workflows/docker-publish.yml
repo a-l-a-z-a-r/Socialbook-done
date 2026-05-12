@@ -24,14 +24,55 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push backend
+      - name: Build and push reviews
         uses: docker/build-push-action@v6
         with:
           context: ./apps/backend
+          build-args: APP_ENTRY=dist/apps/reviews/main.js
           push: true
           tags: |
-            ${{ env.REGISTRY_USER }}/socialbook-backend:${{ github.sha }}
-            ${{ env.REGISTRY_USER }}/socialbook-backend:latest
+            ${{ env.REGISTRY_USER }}/socialbook-reviews:${{ github.sha }}
+            ${{ env.REGISTRY_USER }}/socialbook-reviews:latest
+
+      - name: Build and push users
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/backend
+          build-args: APP_ENTRY=dist/apps/users/main.js
+          push: true
+          tags: |
+            ${{ env.REGISTRY_USER }}/socialbook-users:${{ github.sha }}
+            ${{ env.REGISTRY_USER }}/socialbook-users:latest
+
+      - name: Build and push social
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/backend
+          build-args: APP_ENTRY=dist/apps/social/main.js
+          push: true
+          tags: |
+            ${{ env.REGISTRY_USER }}/socialbook-social:${{ github.sha }}
+            ${{ env.REGISTRY_USER }}/socialbook-social:latest
+
+      - name: Build and push notifications
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/backend
+          build-args: APP_ENTRY=dist/apps/notifications/main.js
+          push: true
+          tags: |
+            ${{ env.REGISTRY_USER }}/socialbook-notifications:${{ github.sha }}
+            ${{ env.REGISTRY_USER }}/socialbook-notifications:latest
+
+      - name: Build and push booklists
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/backend
+          build-args: APP_ENTRY=dist/apps/booklists/main.js
+          push: true
+          tags: |
+            ${{ env.REGISTRY_USER }}/socialbook-booklists:${{ github.sha }}
+            ${{ env.REGISTRY_USER }}/socialbook-booklists:latest
 
       - name: Build and push frontend
         uses: docker/build-push-action@v6

@@ -1,8 +1,8 @@
-replicaCount: 1
+image:
+  repository: alazar111/socialbook-users
+  tag: latest
 
-command:
-  - node
-  - dist/apps/users/main.js
+replicaCount: 1
 
 env:
   MONGODB_URI: mongodb://mongo-vm.example.internal:27017/users
