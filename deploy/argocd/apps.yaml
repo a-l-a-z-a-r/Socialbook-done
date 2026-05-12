@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook-done.git
     targetRevision: main
     path: deploy/backend/chart
     helm:
@@ -31,7 +31,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook-done.git
     targetRevision: main
     path: deploy/backend/chart
     helm:
@@ -56,7 +56,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook-done.git
     targetRevision: main
     path: deploy/backend/chart
     helm:
@@ -81,7 +81,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook-done.git
     targetRevision: main
     path: deploy/backend/chart
     helm:
@@ -106,7 +106,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook-done.git
     targetRevision: main
     path: deploy/backend/chart
     helm:
@@ -131,7 +131,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook-done.git
     targetRevision: main
     path: deploy/frontend
   destination:
@@ -152,7 +152,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook-done.git
     targetRevision: main
     path: deploy/prometheus
   destination:
@@ -173,7 +173,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/a-l-a-z-a-r/Socialbook
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook-done.git
     targetRevision: main
     path: deploy/grafana
   destination:

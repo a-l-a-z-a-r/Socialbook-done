@@ -12,6 +12,12 @@ Minimalized repository layout focused on the deployable application and monitori
 - `deploy/grafana` - Grafana Helm chart
 - `deploy/argocd` - Argo CD applications wiring the charts together
 
+## New Repo Bootstrap
+
+- Update repo URLs only if you move away from `https://github.com/a-l-a-z-a-r/Socialbook-done.git`
+- Apply `deploy/argocd/bootstrap-app.yaml` to let Argo CD manage this repo
+- Push this reduced repo to the new Git repository before syncing Argo CD
+
 ## Backend Releases
 
 The backend chart is reused for these services:
