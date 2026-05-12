@@ -1,5 +1,5 @@
 ingressClassName: traefik
-host: socialbook.ltu-m7011e-11.se
+host: socialbook.204-168-223-99.nip.io
 
 tls:
   enabled: true
