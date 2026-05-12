@@ -29,6 +29,8 @@ kind: Application
 metadata:
   name: rabbitmq
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: default
   source:
@@ -40,7 +42,7 @@ spec:
         - ../helm/overrides/self-hosted/rabbitmq-values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: socialbook
+    namespace: rabbitmq
   syncPolicy:
     automated:
       prune: true

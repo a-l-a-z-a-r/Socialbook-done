@@ -3,7 +3,7 @@ image:
   tag: worker-d742273cfd9f0341cf26d299f8951838379f64cb
 
 env:
-  RABBITMQ_URL: amqp://socialbook:CHANGE_ME@rabbitmq-service-api:5672
+  RABBITMQ_URL: amqp://socialbook:CHANGE_ME@rabbitmq-service-api.rabbitmq.svc.cluster.local:5672
   RABBITMQ_EXCHANGE: socialbook.events
   RABBITMQ_QUEUE: socialbook.notifications
   RABBITMQ_ROUTING_KEYS: review.commented,booklist.updated

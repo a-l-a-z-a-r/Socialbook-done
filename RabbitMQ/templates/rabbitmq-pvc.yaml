@@ -1,0 +1,14 @@
+{{- if .Values.PersistenceEnabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rabbitmq-data
+  labels:
+    app: rabbitmq
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.PersistenceSize | quote }}
+{{- end }}

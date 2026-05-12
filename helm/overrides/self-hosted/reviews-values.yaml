@@ -6,6 +6,6 @@ env:
   MONGODB_URI: mongodb://socialbook-mongo-reviews:27017/reviews
   KEYCLOAK_URL: https://keycloak.204-168-223-99.nip.io
   KEYCLOAK_REALM: Userenter
-  RABBITMQ_URL: amqp://socialbook:CHANGE_ME@rabbitmq-service-api:5672
+  RABBITMQ_URL: amqp://socialbook:CHANGE_ME@rabbitmq-service-api.rabbitmq.svc.cluster.local:5672
   CORS_ALLOWED_ORIGINS: https://socialbook.204-168-223-99.nip.io
   BACKEND_IMAGE_TAG: latest
