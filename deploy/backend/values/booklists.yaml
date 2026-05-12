@@ -1,6 +1,6 @@
 image:
   repository: alazar111/socialbook-booklists
-  tag: latest
+  tag: 39be0674417fd35979d24ef024d4a944d3ffdba4
 
 replicaCount: 1
 

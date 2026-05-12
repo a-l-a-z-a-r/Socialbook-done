@@ -2,10 +2,10 @@ replicaCount: 2
 
 image:
   repository: alazar111/socialbook-frontend
-  tag: latest
+  tag: 39be0674417fd35979d24ef024d4a944d3ffdba4
   pullPolicy: Always
 
-rolloutId: "frontend-minimal"
+rolloutId: "39be0674417fd35979d24ef024d4a944d3ffdba4"
 
 service:
   type: ClusterIP
