@@ -147,6 +147,27 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
+  name: socialbook-ingress
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/a-l-a-z-a-r/Socialbook-done.git
+    targetRevision: main
+    path: deploy/ingress
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: socialbook
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
   name: socialbook-prometheus
   namespace: argocd
 spec:

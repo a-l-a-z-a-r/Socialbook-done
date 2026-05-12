@@ -8,6 +8,7 @@ Minimalized repository layout focused on the deployable application and monitori
 - `apps/frontend` - React frontend source
 - `deploy/backend` - one reusable backend Helm chart plus per-service values
 - `deploy/frontend` - frontend Helm chart with ingress
+- `deploy/ingress` - ingress routing for the live site
 - `deploy/prometheus` - Prometheus Helm chart
 - `deploy/grafana` - Grafana Helm chart
 - `deploy/argocd` - Argo CD applications wiring the charts together
@@ -34,5 +35,5 @@ Service-specific values live in `deploy/backend/values`.
 
 - MongoDB is expected to run outside Kubernetes.
 - Keycloak and RabbitMQ are no longer part of this repository.
-- Old `socialbook-mongo-*` Argo CD applications should be removed from the cluster if you want zero database Pods in Kubernetes.
+- Old `socialbook-mongo-*` and `socialbook-notifications-worker` Argo CD applications should be removed from the cluster if you want the new repo to be the only deployment source.
 - Generated output, experiments, and legacy deployment assets were intentionally removed.
