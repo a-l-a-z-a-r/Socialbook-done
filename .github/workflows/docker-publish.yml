@@ -9,6 +9,7 @@ env:
 
 jobs:
   docker:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -82,3 +83,44 @@ jobs:
           tags: |
             ${{ env.REGISTRY_USER }}/socialbook-frontend:${{ github.sha }}
             ${{ env.REGISTRY_USER }}/socialbook-frontend:latest
+
+      - name: Update deployment tags
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          sha = "${{ github.sha }}"
+
+          files = {
+              "deploy/backend/values/reviews.yaml": "socialbook-reviews",
+              "deploy/backend/values/users.yaml": "socialbook-users",
+              "deploy/backend/values/social.yaml": "socialbook-social",
+              "deploy/backend/values/notifications.yaml": "socialbook-notifications",
+              "deploy/backend/values/booklists.yaml": "socialbook-booklists",
+              "deploy/frontend/values.yaml": "socialbook-frontend",
+          }
+
+          for file_path, image_name in files.items():
+              path = Path(file_path)
+              lines = path.read_text().splitlines()
+              updated = []
+              for line in lines:
+                  stripped = line.strip()
+                  if stripped.startswith("tag:"):
+                      indent = line[: len(line) - len(line.lstrip())]
+                      updated.append(f"{indent}tag: {sha}")
+                  elif path.as_posix() == "deploy/frontend/values.yaml" and stripped.startswith("rolloutId:"):
+                      indent = line[: len(line) - len(line.lstrip())]
+                      updated.append(f'{indent}rolloutId: "{sha}"')
+                  else:
+                      updated.append(line)
+              path.write_text("\n".join(updated) + "\n")
+          PY
+
+      - name: Commit deployment tags
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add deploy/backend/values/*.yaml deploy/frontend/values.yaml
+          git commit -m "chore: deploy images for ${{ github.sha }} [skip ci]" || exit 0
+          git push
