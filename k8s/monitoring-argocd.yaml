@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: k8s/monitoring
   destination:
     server: https://kubernetes.default.svc

@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: keycloak/keycloak-chart
     helm:
       valueFiles:
@@ -33,7 +33,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: RabbitMQ
     helm:
       valueFiles:
@@ -57,7 +57,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: helm/socialbook-mongo-reviews
   destination:
     server: https://kubernetes.default.svc
@@ -78,7 +78,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: helm/socialbook-mongo-users
   destination:
     server: https://kubernetes.default.svc
@@ -99,7 +99,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: helm/socialbook-mongo-social
   destination:
     server: https://kubernetes.default.svc
@@ -120,7 +120,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: helm/socialbook-mongo-booklists
   destination:
     server: https://kubernetes.default.svc
@@ -141,7 +141,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: helm/socialbook-mongo-notifications
   destination:
     server: https://kubernetes.default.svc
@@ -168,7 +168,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: helm/socialbook-reviews
     helm:
       valueFiles:
@@ -198,7 +198,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: helm/socialbook-users
     helm:
       valueFiles:
@@ -228,7 +228,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: helm/socialbook-social
     helm:
       valueFiles:
@@ -258,7 +258,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: helm/socialbook-booklists
     helm:
       valueFiles:
@@ -288,7 +288,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: helm/socialbook-notifications
     helm:
       valueFiles:
@@ -318,7 +318,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: helm/socialbook-frontend
     helm:
       valueFiles:
@@ -348,7 +348,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: helm/socialbook-notifications-worker
     helm:
       valueFiles:
@@ -372,7 +372,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/a-l-a-z-a-r/Socialbook
-    targetRevision: Dev
+    targetRevision: main
     path: helm/socialbook-ingress
     helm:
       valueFiles:
